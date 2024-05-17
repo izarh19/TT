@@ -1,0 +1,64 @@
+.warrper3{/* warp everythingg*/
+background-color: #fff8e7;
+border:solid gray 1px;
+border-radius: 8px;
+width:450px;
+height: 390px;
+position: relative;
+top:20px;
+left:120px;
+padding-top: 36px;
+filter: drop-shadow(4px 4px 4px rgba(173, 173, 173, 0.8));
+}
+#exp{/* the font oh how was...*/
+font-family: Arial, Helvetica, sans-serif;
+font-size:large;
+}
+#stars/* the pic*/
+{
+width: 240px;
+}
+.un/* the inputs styling yur name and mail*/
+{
+margin: 7px;
+border-radius: 8px;
+border:solid black 0.6px;
+height: 24px;
+border-radius:"5px";
+border:"solid black 1.5px" ;
+background-color:white;
+width: 210px;
+font-family: Arial, Helvetica, sans-serif;
+height:27px;
+}
+.un-diff{/* the message input*/
+border-radius: 8px;
+border:solid black 0.6px;
+border-radius:"5px";
+border:"solid black 1.5px" ;
+background-color:white;
+width: 210px;
+font-family: Arial, Helvetica, sans-serif;
+height:70px;
+padding-bottom: 37px;
+}
+
+#send{ /*the send button*/
+position: absolute;
+border-radius:5px;
+width: 210px;
+border:solid rgb(0, 0, 0) 1.5px;
+background-color:black;
+height: 20px;
+color: #fefefe;
+font-family: Arial, Helvetica, sans-serif;
+right:120px;
+bottom:15px;
+
+}
+#write{
+position: absolute;
+width :500px;
+left: 800px;
+top:170px;
+}
