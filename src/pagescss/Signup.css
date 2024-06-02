@@ -1,0 +1,75 @@
+body{
+background-color: white;
+}
+#compbackg{
+position: absolute;
+left: 200px;
+height: 780px;
+bottom:-120px;
+background-size: cover;  
+padding-left: 33px
+}
+
+.warpper1{
+position: relative;
+padding-left: 490px;
+top:70px;
+margin: 20px;
+
+}
+.formsup{/*هون الفراغ بين كل سدي وسدي*/
+width:15px;
+height:17px;
+padding: 0px;
+padding-top: 30px;
+padding-right: 17px;
+position: relative;
+right:10px;
+}
+#btn1{/* هون زر ال ساين اب*/
+position: relative;
+top:100px;
+left:30px;
+width: 220px;
+height:28px;
+border-radius: 5px;
+color: white;
+background-color:black;
+font-family: Arial, Helvetica, sans-serif;
+}
+#lnINsp{/* هون زر الوج ان */
+position: relative;
+width:45px;
+top: 230px;
+right:500px;
+color: black;
+border-bottom: thick line black;
+font-family: Arial, Helvetica, sans-serif;
+}
+#spinput{ /* the inputss */
+width: 230px;
+border-radius: 8px;
+position: relative;
+height: 24px;
+border-radius:"5px";
+border:"solid black 1.5px" ;
+background-color:rgba(236, 236, 236, 1);
+padding-left: 34px;
+font-family: Arial, Helvetica, sans-serif;
+}
+#iconUsp{/* the user icon in log in it is iconU but here is iconUsp*/
+position:absolute;
+right:694px;
+top: 207px;
+}
+#iconKsp{/* the key icon*/
+position:absolute;
+right:694px;
+top: 256px;
+}
+
+#iconEsp{/* the envolpe icon*/
+position:absolute;
+right:694px;
+top: 305px;
+}

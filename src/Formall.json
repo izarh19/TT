@@ -1,0 +1,59 @@
+
+{
+
+"login":[
+  {
+
+    "id":3,
+    "name":"google",
+    "type":"button",
+    "placeholder":"log in with Google",
+    "text":" ------------------------ OR ------------------------",
+    "icon":"faGoogle"
+    },
+
+  {
+  "id":1,
+  "name":"username",
+  "type":"text",
+  "placeholder":"Enter you Username",
+  "icon":"faUser"
+  },
+
+  {
+    "id":2,
+  "name":"password",
+  "type":"text",
+  "placeholder":"Enter you Password",
+  "icon":"faKey"
+  }
+
+],
+"signup":[
+
+  {
+    "id":3,
+  "name":"username",
+  "type":"text",
+  "placeholder":"Enter you Username",
+  "icon":"faUser"
+  
+  },
+
+  {
+    "id":4,
+  "name":"password",
+  "type":"text",
+  "placeholder":"Enter you Password",
+  "icon":"faKey"
+  },
+
+  {
+    "id":5,
+    "name":"gmail",
+    "type":"text",
+    "placeholder":"Enter you Gmail",
+    "icon":"faEnvelope"
+    }
+]}
+
