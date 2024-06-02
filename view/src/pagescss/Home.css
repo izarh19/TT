@@ -1,0 +1,80 @@
+#bd{/* this is about the background picture*/
+height: 480px;
+background-image: url('../Img/lineb.jpg');              
+background-size: 33.3%;
+
+position: relative;
+
+}
+.warrper{/* the beigh border */
+
+border-radius: 80px;
+width: 490px;
+height:280px;
+margin: auto;
+margin-top: 80px;
+padding: 40px;
+text-align: center;
+background-color: rgba(255, 248, 231, 0.8);
+position: absolute;
+top:90px;
+right: 400px;
+border:solid black 1px;
+}
+.theb{/* the rectangular that about the padding bettwwen the button  */
+padding: 0px;
+border:none;
+background-color: none;
+
+}
+#logohome{
+position: relative;
+width: 340px;
+bottom:40px;
+
+}
+
+
+.theb li{/* the buttons place*/
+padding:30px;
+position: relative;
+width:30px;
+background-color: none;
+bottom: 18px;
+}
+
+.theb li a button{/* the button style*/
+background-color: black;
+color:white;
+height: 24px;
+width: 130px;
+border-radius: 5px;
+font-family:"Times New Roman", Times, serif;
+font-size: medium;
+
+}
+#skipbtn{ /* the skip "button"*/
+position: relative;
+padding-left: 350px;
+border-style: solid;
+border-style: solid;
+border-bottom: none;
+border-top: none;
+border-left: none;
+border-right: none;
+font-weight: bold;
+color: black;
+font-family:'Times New Roman', Times, serif;
+font-size: medium;
+
+
+}
+#text{/* the text under the logo*/
+font-family:'Times New Roman', Times, serif;
+font-size: medium;
+position: relative;
+color:black;
+bottom: 55px;
+margin: 0 -0.4em;
+
+}

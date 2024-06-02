@@ -1,0 +1,216 @@
+
+body{
+background-color:white;
+
+}
+
+#login{
+padding-top:12px;
+}
+
+#tool{/* the picture of the tools */
+height: 250px;
+width:500px;
+position: absolute;
+right: 784px;
+top: 190px;
+}
+
+#mouse{/*the picutre of the mouse */
+position: absolute;
+right: 0px;
+top:115px;
+width: 490px;
+
+}
+
+
+
+.warrper2 {/* the block that has everything inside it */
+position: relative;
+border-radius: 12px;
+left: 430px;
+padding-top: 0px;
+margin: 7px;
+height: 370px;
+width: 370px;
+top: 110px;
+z-index: 1;
+}
+
+.coloful {
+position: absolute;
+border-radius: 12px;
+left: 420px;
+padding-top: 0px;
+margin: 7px;
+height: 380px;
+width: 370px;
+top: 100px;
+z-index: 0;
+overflow: hidden;
+}
+
+.coloful::before {
+content: '';
+position: absolute;
+border-radius: 50%;
+background: conic-gradient(
+#fd004c,
+#fe9000,
+#fff020,
+#3edf4b,
+#3363ff,
+#b102b7,
+#fd004c
+);
+height: 300%;
+width: 270%;
+top: -100%;
+left: -110%;
+animation: moveColors 5s infinite linear;
+z-index: -1;
+}
+
+@keyframes moveColors {
+100% {
+transform: rotate(360deg);
+}
+}
+
+.coloful::after {/* the inner block */
+content: "";
+position: absolute;
+border-radius: 12px;
+left: 7px;
+top: 8px;
+height: 365px;
+width: 356px;
+background-color: white; 
+z-index: 0;
+}
+
+
+.btn2{/* LOG IN  button*/
+position:absolute;
+top:400px;
+left: 500px;
+border-radius:5px;
+width: 240px;
+border:solid rgb(0, 0, 0) 1.5px;
+background-color:black;
+height: 20px;
+color: #fefefe;
+font-family:"Times New Roman", Times, serif;
+font-size: medium;
+z-index: 1;
+}
+
+
+#sp{
+color:black;
+z-index: 1;
+
+}
+
+
+.lnstyle{/* style the inputs*/
+position: relative;
+background-color: rgba(236, 236, 236, 1);
+width:240px;
+height: 25px;
+border-radius: 8px;
+padding-left: 35px;
+font-family:"Times New Roman", Times, serif;
+font-size: medium;
+}
+.googlebtn{/* the goolge button*/
+width:240px;
+height:27px;
+background-color: rgb(254, 253, 253);
+border:  groove lightgray 1.4px;
+position: relative;
+bottom:70px;
+border-radius: 8px;
+text-align: right;
+padding-right:14px;
+font-family:"Times New Roman", Times, serif;
+font-size: medium;
+z-index: 1;
+}
+.textor{/* -----or-----*/
+position: absolute;
+top:110px;
+left:40px;
+font-family:"Times New Roman", Times, serif;
+font-size: medium;
+}
+
+.lninputs{/* the location of the inputs */
+padding:8px;
+position: relative;
+top:30px;
+right:9px;
+
+}
+
+
+#spINln{ /* the SIGN UP*/
+position: absolute;
+top: 450px;
+left:510px;
+color:black;
+font-family:"Times New Roman", Times, serif;
+font-size: medium;
+z-index: 1;
+}
+
+#iconK{/* icon key*/
+position: absolute;
+top:322px;
+left:502px;
+z-index: 1;
+}
+#iconU{/* icon user*/
+position: absolute;
+top:281px;
+left:502px;
+z-index: 1;
+}
+#iconG{
+position: absolute;
+top:174px;
+right:700px;
+z-index: 1;
+}
+.lnstyle{/* style the inputs*/
+position: relative;
+background-color: rgba(236, 236, 236, 1);
+width:240px;
+height: 25px;
+border-radius: 8px;
+padding-left: 35px;
+font-family:"Times New Roman", Times, serif;
+font-size: medium;
+}
+.googlebtn{/* the goolge button*/
+width:240px;
+height:27px;
+background-color: rgb(254, 253, 253);
+border:  groove lightgray 1.4px;
+position: relative;
+bottom: 44px;
+right:10px;
+border-radius: 8px;
+text-align: right;
+padding-right:14px;
+font-family:"Times New Roman", Times, serif;
+font-size: medium;
+}
+.textor{/* -----or-----*/
+position: absolute;
+top:10px;
+left:40px;
+font-family:"Times New Roman", Times, serif;
+font-size: medium;
+}

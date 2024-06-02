@@ -1,0 +1,185 @@
+
+#canva{/* this is the canva (picture)*/
+position:absolute;
+width:900px;
+height:470px;
+top:100px;
+left:300px;
+border: solid black 0.1px;
+}
+
+.btn3{/* the place of 3 buttons*/
+width:270px;
+height: 20px;
+margin: 20px;
+padding: 20px;
+
+}
+
+.normalb{/* styling the buttons save  share and go back*/
+border-radius:10px;
+position: relative;
+right: 40px;
+top:190px;
+width: 100px;
+border:solid rgb(0, 0, 0) 1.5px;
+background-color:rgba(0, 0, 0, 0.85);
+height: 35px;
+color: #fefefe;
+font-family:"Times New Roman", Times, serif;
+font-size: medium;
+
+}
+.normalb-play{/* the play button*/
+border-radius:10px;
+width: 100px;
+border:solid rgb(0, 0, 0) 1.5px;
+position: relative;
+bottom: 60px;
+right: 40px;
+background-color:rgba(0, 0, 0, 0.85);
+height: 35px;
+color: #fefefe;
+font-family:"Times New Roman", Times, serif;
+font-size: medium;
+}
+
+.normalb-not{/* the one who have the features*/
+width: 90px;
+border:solid rgb(0, 0, 0) 1.5px;
+background-color:rgba(0, 0, 0, 0.85);
+height: 280px;
+position: relative;
+right: 40px;
+bottom:55px;
+color: #fefefe;
+font-family:"Times New Roman", Times, serif;
+font-size: medium;
+position: relative;
+}
+.widthone{/* where the folder*/
+position: relative;
+width:900px;
+bottom: 21px;
+height: 70px;
+left:260px;
+color: #fefefe;
+font-family:"Times New Roman", Times, serif;
+font-size: medium;
+border:solid rgb(0, 0, 0) 1.5px;
+background-color:rgba(0, 0, 0, 0.85);
+text-align: right;
+padding-right: 100px;
+}
+#brush{
+position: relative;
+width: 30px;
+height: 30px;
+right: 435px;
+bottom: 260px;
+
+}
+#eraser{
+position: relative;
+width: 27px;
+height: 27px;
+right: 465px;
+bottom: 220px;
+}
+#colors{
+position: relative;
+width:30px;
+height:30px;
+right: 495px;
+bottom: 170px;
+}
+#shaeps{
+position: relative;
+width:30px;
+height:30px;
+right: 525px;
+bottom: 125px;
+}
+#ai{
+position: relative;
+width:25px;
+height:25px;
+right: 555px;
+bottom: 85px;
+}
+#featture{
+
+position: relative;
+width:20px;
+height:20px;
+right: 580px;
+bottom: 40px;
+}
+#folder{
+position:absolute;
+bottom: 520px;
+left:1120px;
+color:white;
+}
+#nbrush{
+position: relative;
+
+width:20px;
+height:20px;
+bottom: 280px;
+right:425px;
+
+}
+#neraser{
+position: relative;
+width:20px;
+height:20px;
+bottom: 240px;
+right:445px;
+
+}
+#ncolors{
+position: relative;
+width:20px;
+height:20px;
+bottom: 200px;
+right:465px;
+
+}
+#nshaeps{
+position: relative;
+width:20px;
+height:20px;
+bottom: 155px;
+right:485px;
+
+}
+#nai{
+position: relative;
+width:20px;
+height:20px;
+bottom: 110px;
+right:505px;
+
+}
+#nfea{
+position: relative;
+width:20px;
+height:20px;
+bottom: 65px;
+right:525px;
+}
+
+#next{
+position:relative;
+width:40px;
+bottom: 400px;
+right: 200px;
+}
+#back{
+position:relative;
+width:40px;
+bottom: 400px;
+right: 280px;
+rotate: 180deg;
+}

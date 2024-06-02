@@ -1,0 +1,152 @@
+body {
+background-color: rgb(246, 34, 34);
+position: relative;
+}
+#sentience{
+text-align: center;
+font-family:"Times New Roman", Times, serif;
+font-weight: 1000;
+font-size: x-large;
+position: relative;
+top:70px;
+z-index: 1;
+right:170px;
+
+}
+
+#thebigwarp {/* the warp in the background*/
+position: relative;
+height: 400px;
+left:45px;
+width: 960px;
+margin: auto;
+border-radius: 12px;
+background-color:#fffae7 ;
+z-index: -1;
+
+filter: blur(27px);
+}
+
+.evet {/* the colorful bord*/
+position: absolute;
+top: 130px;
+left: 270px;
+height: 350px;
+width: 700px;
+margin: auto;
+border-radius: 12px;
+overflow: hidden;
+box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+filter: drop-shadow( 5px 4px 4px rgba(173, 173, 173, 0.8));
+border:solid black 0.1px;
+
+}
+
+.evet::before {/* the colors inside it*/
+content: '';
+position: absolute;
+border-radius: 50%;
+background:conic-gradient(
+#fd004c,
+#fe9000,
+#fff020,
+#3edf4b,
+#3363ff,
+#b102b7,
+#fd004c
+) ;
+height: 300%;
+width: 290%;
+top: -100%;
+left: -110%;
+animation: moveColors 10s infinite linear;
+z-index: -1;
+
+}
+
+@keyframes moveColors {
+100% {
+transform: rotate(360deg);
+}
+}
+
+.evet::after {/* the beig inside the colorful block*/
+content: "";
+position: absolute;
+background-color: #fff8e7;
+left: 0px;
+top: 0px;
+height: 350px;
+width: 370px;
+border-radius: 12px;
+display: grid;
+border:solid black 0.1px;
+}
+
+.formsup {/* the boder that have the button insid it*/
+
+padding: 14px ;
+right:180px;
+top:90px;
+position: relative;
+justify-content: center;
+z-index: 1;
+}
+
+#spinput {/* the inputsss*/
+width: 240px;
+border-radius: 8px;
+position: relative;
+height: 24px;
+background-color: rgba(236, 236, 236, 1);
+padding-left: 10px;
+font-family: "Times New Roman", Times, serif;
+font-size: medium;
+padding-left: 26px;
+}
+
+#btn1 {/* the signup button*/
+position: absolute;
+bottom: 160px;
+left:320px;
+width: 240px;
+height: 24px;
+border-radius: 5px;
+color: white;
+background-color: black;
+font-family: "Times New Roman", Times, serif;
+font-size: medium;
+z-index: 1;
+}
+
+#lnINsp {/* the log in button */
+position: absolute;
+bottom: 130px;
+right: 300px;
+color: black;
+font-family: "Times New Roman", Times, serif;
+font-size: large;
+}
+
+
+#iconUsp  {
+top: 238px;
+left: 328px;
+position:absolute;
+z-index: 1;
+}
+
+#iconKsp {
+top: 290px;
+left: 328px;
+position:absolute;
+z-index: 1;
+
+}
+#iconEsp{
+top: 342px;
+left:328px;
+position:absolute;
+z-index: 1;
+
+}

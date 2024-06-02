@@ -1,0 +1,50 @@
+body{
+background-color: white;
+}
+.theabout{/*التكست*/
+ margin-left:20px;
+ width: 660px;
+ height:79px;
+text-align: left;
+margin: 35px;
+line-height: 1.6;
+}
+
+.BGI{/*back groung img*/
+position: relative;
+bottom:37px;
+float: right;
+width :200px;
+height:478px;
+background-image: url('../Img/lineb.jpg');
+background-position:left;
+background-repeat:none;
+
+}
+#about{/*كلمة اباوت*/
+position: relative;
+font-family:"Times New Roman", Times, serif;
+font-size: xx-large;
+top:20px;
+padding-left: 3px;
+}
+
+span{/*to style the name About(highlighter)*/
+position: relative;
+left:33px;
+}
+span h1 {/*highlighter style*/
+border-radius: 0.8em 0.3em;
+padding-left: 88px;
+background: transparent;
+background-image: linear-gradient(
+to right,
+rgba(255, 225, 0, 0.1),
+rgba(255, 225, 0, 0.7) 4%,
+rgba(255, 225, 0, 0.3)
+);
+-webkit-box-decoration-break: clone;
+box-decoration-break: clone;
+width:220px;
+
+}

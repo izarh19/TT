@@ -1,0 +1,22 @@
+[
+
+  {
+    "pageId": "12",
+    "pageName": "about",
+    "title": "About",
+    "text":
+         [
+        {"p":"Welcome to Story Sketcher, your ultimate tool for bringing your creative ideas to life through drawing and videos!   "  },  
+        {"p":" At Story Sketcher, we understand the power of visual storytelling. Whether you're an amateur artist or a professional graphic designer, our program is designed to help you turn your sketches into captivating animations and videos effortlessly."  }, 
+        {"p":  "Story Sketcher provides an intuitive platform for you to unleash your creativity. With our user-friendly interface and powerful features, you can easily create stunning animations and videos from your drawings." },     
+        {"p":  "   Our mission at Story Sketcher is to empower individuals to express themselves through visual storytelling. Whether you're creating stories for fun or for professional projects, we're here to support you every step of the way. "},          
+        {"p":  "  Join us on this creative journey and turn your sketches into captivating stories with Story Sketcher!"}
+      ],
+    "url": "./About"
+  }
+]
+
+
+
+
+

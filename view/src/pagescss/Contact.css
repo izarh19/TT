@@ -1,0 +1,100 @@
+.warrper3{/* warp everythingg*/
+background-color: #fff8e7;
+border:solid gray 1px;
+border-radius: 8px;
+width:450px;
+height: 390px;
+position: relative;
+top:20px;
+left:600px;
+padding-top: 36px;
+filter: drop-shadow(4px 4px 4px rgba(173, 173, 173, 0.8));
+}
+#exp{/* the font of how was your exprince */
+font-family:"Times New Roman", Times, serif;
+font-size:large;
+}
+#stars/* the pic*/
+{
+width: 240px;
+}
+.un/* the inputs styling yur name and mail*/
+{
+margin: 7px;
+border-radius: 8px;
+border:solid black 0.6px;
+height: 24px;
+border-radius:"5px";
+border:"solid black 1.5px" ;
+background-color:white;
+width: 210px;
+font-family:"Times New Roman", Times, serif;
+font-size: medium;
+
+height:27px;
+}
+.un-diff{/* the message input*/
+border-radius: 8px;
+border:solid black 0.6px;
+border-radius:"5px";
+border:"solid black 1.5px" ;
+background-color:white;
+width: 210px;
+font-family:"Times New Roman", Times, serif;
+font-size: medium;
+height:70px;
+padding-bottom: 37px;
+}
+
+#send{ /*the send button*/
+position: absolute;
+border-radius:5px;
+width: 210px;
+border:solid rgb(0, 0, 0) 1.5px;
+background-color:black;
+height: 20px;
+color: #fefefe;
+font-family:"Times New Roman", Times, serif;
+font-size: medium;
+right:120px;
+bottom:15px;
+
+}
+#write{/* the img*/
+position: absolute;
+width :500px;
+left: 40px;
+top:170px;
+}
+
+
+.star-rating {/* how they look*/
+display: inline-block;
+padding: 30px;
+
+direction: rtl;
+}
+
+.star-rating input[type="radio"] {
+display: none;
+}
+
+.star-rating label {/* styling stars هون بيبينو عنا*/ 
+font-size: xx-large;
+color: black;
+margin-right: 4px;
+cursor: pointer;
+transition: color 0.3s ease;
+}
+
+.star-rating input[type="radio"]:checked ~ label {/* when we click on the stars وبتعلم (بتعلم عوحدة لحال) */
+color: gold;
+text-shadow: 0 0 20px #952; 
+}
+
+.star-rating label:hover,/* it hovers on the start but only one a time*/
+.star-rating label:hover ~ label {/* when we pass the stars  it marks gold (بتعلم) hover on all of themw*/
+color: gold; 
+transition: color 0.3s ease;
+
+}
