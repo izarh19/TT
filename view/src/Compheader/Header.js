@@ -12,7 +12,7 @@ export default class Header extends Component {
   }
 
   componentDidMount() {
-    fetch('http://localhost:3001/hm/-1', {
+    fetch('http://localhost:3001/hf/-1', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -26,7 +26,7 @@ export default class Header extends Component {
 
   render() {
     
-    const {headerPage } = this.state;
+    const {headerPage} = this.state;
     return (
       <header>
         <div className="header">
@@ -37,8 +37,8 @@ export default class Header extends Component {
           </a>
           
             <ul className="buttons">
-                {headerPage.map((btn) => (
-                  <li key={btn.id}><a href={btn.url}>{btn.title}</a></li>
+                {Array.isArray(headerPage) &&headerPage.map((btn) => (
+                  <li key={btn.MID}><a href={btn.menuURL}>{btn.menuTitle}</a></li>
                 ))}
             </ul>
          

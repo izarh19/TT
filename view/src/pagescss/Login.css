@@ -24,15 +24,13 @@ width: 490px;
 
 }
 
-
-
 .warrper2 {/* the block that has everything inside it */
 position: relative;
 border-radius: 12px;
 left: 430px;
 padding-top: 0px;
 margin: 7px;
-height: 370px;
+height: 90px;
 width: 370px;
 top: 110px;
 z-index: 1;
@@ -124,32 +122,12 @@ padding-left: 35px;
 font-family:"Times New Roman", Times, serif;
 font-size: medium;
 }
-.googlebtn{/* the goolge button*/
-width:240px;
-height:27px;
-background-color: rgb(254, 253, 253);
-border:  groove lightgray 1.4px;
-position: relative;
-bottom:70px;
-border-radius: 8px;
-text-align: right;
-padding-right:14px;
-font-family:"Times New Roman", Times, serif;
-font-size: medium;
-z-index: 1;
-}
-.textor{/* -----or-----*/
-position: absolute;
-top:110px;
-left:40px;
-font-family:"Times New Roman", Times, serif;
-font-size: medium;
-}
+
 
 .lninputs{/* the location of the inputs */
 padding:8px;
 position: relative;
-top:30px;
+top:58px;
 right:9px;
 
 }
@@ -179,7 +157,7 @@ z-index: 1;
 }
 #iconG{
 position: absolute;
-top:174px;
+top:170px;
 right:700px;
 z-index: 1;
 }
@@ -194,16 +172,17 @@ font-family:"Times New Roman", Times, serif;
 font-size: medium;
 }
 .googlebtn{/* the goolge button*/
+display: inline-block;
 width:240px;
-height:27px;
+height:25px;
 background-color: rgb(254, 253, 253);
 border:  groove lightgray 1.4px;
 position: relative;
-bottom: 44px;
+bottom: 128px;
 right:10px;
 border-radius: 8px;
 text-align: right;
-padding-right:14px;
+padding-right:10px;
 font-family:"Times New Roman", Times, serif;
 font-size: medium;
 }

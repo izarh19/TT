@@ -1,13 +1,25 @@
 
-#canva{/* this is the canva (picture)*/
+canvas{/* this is the canva (picture)*/
 position:absolute;
-width:900px;
-height:470px;
 top:100px;
 left:300px;
-border: solid black 0.1px;
-}
 
+}
+#brushscolor{
+position: relative;
+right:40px;
+display: inline-block;
+}
+#brushwidth{
+position: relative;
+right: 25px;
+top:44px;
+}
+#eraserwidth{
+position:relative;
+right:400px;
+bottom: 60px;
+}
 .btn3{/* the place of 3 buttons*/
 width:270px;
 height: 20px;
@@ -20,7 +32,7 @@ padding: 20px;
 border-radius:10px;
 position: relative;
 right: 40px;
-top:190px;
+top:370px;
 width: 100px;
 border:solid rgb(0, 0, 0) 1.5px;
 background-color:rgba(0, 0, 0, 0.85);
@@ -35,7 +47,7 @@ border-radius:10px;
 width: 100px;
 border:solid rgb(0, 0, 0) 1.5px;
 position: relative;
-bottom: 60px;
+bottom: 240px;
 right: 40px;
 background-color:rgba(0, 0, 0, 0.85);
 height: 35px;
@@ -51,7 +63,7 @@ background-color:rgba(0, 0, 0, 0.85);
 height: 280px;
 position: relative;
 right: 40px;
-bottom:55px;
+bottom:115px;
 color: #fefefe;
 font-family:"Times New Roman", Times, serif;
 font-size: medium;
@@ -60,7 +72,7 @@ position: relative;
 .widthone{/* where the folder*/
 position: relative;
 width:900px;
-bottom: 21px;
+bottom: 320px;
 height: 70px;
 left:260px;
 color: #fefefe;
@@ -72,48 +84,48 @@ text-align: right;
 padding-right: 100px;
 }
 #brush{
-position: relative;
+position:absolute;
 width: 30px;
 height: 30px;
-right: 435px;
-bottom: 260px;
+left: 5px;
+bottom: 10px;
 
 }
 #eraser{
 position: relative;
 width: 27px;
 height: 27px;
-right: 465px;
-bottom: 220px;
+right: 450px;
+bottom: 265px;
 }
 #colors{
 position: relative;
 width:30px;
 height:30px;
-right: 495px;
-bottom: 170px;
+right: 480px;
+bottom: 215px;
 }
 #shaeps{
 position: relative;
 width:30px;
 height:30px;
-right: 525px;
-bottom: 125px;
+right: 510px;
+bottom: 170px;
 }
 #ai{
 position: relative;
 width:25px;
 height:25px;
-right: 555px;
-bottom: 85px;
+right: 538px;
+bottom: 130px;
 }
 #featture{
 
 position: relative;
 width:20px;
 height:20px;
-right: 580px;
-bottom: 40px;
+right: 560px;
+bottom: 90px;
 }
 #folder{
 position:absolute;
@@ -121,65 +133,67 @@ bottom: 520px;
 left:1120px;
 color:white;
 }
-#nbrush{
-position: relative;
-
-width:20px;
-height:20px;
-bottom: 280px;
-right:425px;
-
-}
-#neraser{
-position: relative;
-width:20px;
-height:20px;
-bottom: 240px;
-right:445px;
-
-}
-#ncolors{
-position: relative;
-width:20px;
-height:20px;
-bottom: 200px;
-right:465px;
-
-}
-#nshaeps{
-position: relative;
-width:20px;
-height:20px;
-bottom: 155px;
-right:485px;
-
-}
-#nai{
-position: relative;
-width:20px;
-height:20px;
-bottom: 110px;
-right:505px;
-
-}
-#nfea{
-position: relative;
-width:20px;
-height:20px;
-bottom: 65px;
-right:525px;
-}
 
 #next{
 position:relative;
 width:40px;
-bottom: 400px;
+bottom: 430px;
 right: 200px;
 }
 #back{
 position:relative;
 width:40px;
-bottom: 400px;
+bottom: 430px;
 right: 280px;
 rotate: 180deg;
+}
+
+
+.dropdown {
+display: inline-block;
+}
+
+.dropdown button {/* the button it self where is is place */
+background-color:rgba(0, 0, 0, 0);
+border: none;
+padding: 15px;
+cursor: pointer;
+position: relative;
+bottom: 250px;
+right:510px;
+}
+
+.dropdown button :hover {
+background-color: rgba(0, 0, 0, 0.85);
+
+}
+.dropdown .content :hover {
+background-color: rgba(212, 210, 210, 0.85);
+
+
+}
+
+.dropdown .content {/*w/out it the inputs are in someplace*/
+display: none;
+position: absolute;
+bottom:360px;
+left:130px;
+box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+}
+
+.dropdown .content label, .content input {/* the input itself*/
+display: inline-block;
+position: absolute;
+left:0px;
+
+}
+
+.dropdown:hover .content {/*the box*/
+display: block;
+position: absolute;
+left:160px;
+width:160px;
+height:130px;
+background-color: whitesmoke;
+border:1px solid black;
 }

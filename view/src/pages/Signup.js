@@ -16,12 +16,7 @@ export default class Signup extends Component {
     };
     }
     componentDidMount() {
-    fetch('http://localhost:3001/formall/signup', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-    })
+    fetch('http://localhost:3001/inputs/2')
     .then(response => response.json())
     .then(data => this.setState({ signupPage: data }))
     .catch(error => console.error('Error fetching header page data:', error));
@@ -35,16 +30,17 @@ return (<div>
   
   <h1>sign up </h1>
 <p id="sentience">Create Story Sketch account </p>
-<div id="thebigwarp"></div>
+  <div id="thebigwarp"></div>
 
   <div className="evet">
     
-{ signupPage.map((sp)=>
- <div key={sp.id} className="warpper1">
-  <div className="formsup">
-    <input type={sp.type}  placeholder={sp.placeholder}  id="spinput"></input>
-  </div>  
-</div>
+{signupPage.map((sp)=>
+
+ <div key={sp.inputID} className="warpper1">
+    <div className="formsup">
+      <input type={sp.inputType}  placeholder={sp.placeholder}  id="spinput"></input>
+    </div>  
+ </div>
 )}
 
 

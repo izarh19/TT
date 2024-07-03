@@ -12,15 +12,14 @@ export default class Footer extends Component {
   }
 
   componentDidMount() {
-    fetch('http://localhost:3001/fm/-2', {
+    fetch('http://localhost:3001/hf/-2', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
     })
       .then(response => response.json())/*if i got response from the json */
-      .then(data => this.setState({ footerPage: data }))/* put the data that i responsed in footerpage */
-      /* set state update the footer page in the data it recive */
+      .then(data => this.setState({ footerPage: data }))/* put the data that i responsed in footerpage *//* set state update the footer page in the data it recive */
       .catch(error => console.error('Error fetching footer page data:', error));
   }
 
@@ -32,8 +31,8 @@ return (
   
 <footer>
 <ul  className="inside_footer" >
-  {footerPage.map((ftr)=>(
-<li><a href={ftr.url}>{ftr.title} </a></li>))}
+  {Array.isArray(footerPage) &&footerPage.map((ftr)=>(
+<li><a href={ftr.menuURL}>{ftr.menuTitle} </a></li>))}
 </ul>
 
 <ul >

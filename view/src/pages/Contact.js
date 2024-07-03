@@ -12,24 +12,26 @@ export default class Contact extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      contactPage: []
+      contactPage:[]
     };
     }
 
     componentDidMount() {
-    fetch('http://localhost:3001/formall/contactus', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-    })
+    fetch('http://localhost:3001/inputs/5')
     .then(response => response.json())
     .then(data => this.setState({contactPage: data }))
     .catch(error => console.error('Error fetching header page data:', error));
-    }
+    }  
     render(){
+      const { contactPage } = this.state;
+      console.log("dog");
     
-    const { contactPage } = this.state;
+   
+      if (!contactPage){
+         return(<div>data not found</div>);
+        }
+    
+    
 
   return (
     <div>
@@ -52,12 +54,15 @@ export default class Contact extends Component {
          <input type="radio" id="star1" name="rating" value="1" />
         <label htmlFor="star1"><FontAwesomeIcon icon={faStar} /></label>
         </div>
-
-        {contactPage.map((cs) => (
-          <div key={cs.id}>
-            <input type={cs.type} placeholder={cs.placeholder} className={cs.class} />
-          </div>
+           <div >
+        {contactPage.map((cs, index) => (
+            
+            cs.inputType === "text" ?(
+               <input key={cs.index} type={cs.inputType} placeholder={cs.placeholder}  className={cs.inputCssClass}/>):(
+               <textarea key={cs.index} type={cs.inputType} placeholder={cs.placeholder} className={cs.inputCssClass}></textarea>)
+          
         ))}
+        </div>
         <a href="./Home"><button id="send">Send</button></a>
       </div>
       <Footer></Footer>

@@ -1,40 +1,45 @@
 {
-"servies":[{
-"id":15,
-"type":"border",
-"text":"Folder +",
-"cssClass":"widthone"
+ "servies":[
+{
+ "id":15,
+ "type":"border",
+ "text":"Folder +",
+ "cssClass":"widthone"
 },
 
 {
-"id":10,
-"type":"border",
-"text":"play",
-"cssClass":"normalb-play"
+ "id":10,
+ "type":"border",
+ "text":"play",
+ "cssClass":"normalb-play"
 },
+
 {
-"id":11,
-"type":"border",
-"text":"",
-"cssClass":"normalb-not"
+ "id":11,
+ "type":"border",
+ "text":"",
+ "cssClass":"normalb-not"
 },
+
 {
-"id":12,
-"type":"border",
-"text":"save",
-"cssClass":"normalb"
+ "id":12,
+ "type":"border",
+ "text":"save",
+ "cssClass":"normalb"
 },
+
 {
-"id":13,
-"type":"border",
-"text":"share",
-"cssClass":"normalb"
+ "id":13,
+ "type":"border",
+ "text":"share",
+ "cssClass":"normalb"
 },
+
 {
-"id":14,
-"type":"border",
-"text":"go back",
-"cssClass":"normalb"
+ "id":14,
+ "type":"border",
+ "text":"back",
+ "cssClass":"normalb"
 }
-]
+  ] 
 }

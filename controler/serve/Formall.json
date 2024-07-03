@@ -1,6 +1,5 @@
 
 {
-
 "login":[
   {
 
@@ -8,8 +7,7 @@
     "name":"google",
     "type":"button",
     "placeholder":"log in with Google",
-    "text":" ------------------------ OR ------------------------",
-    "icon":"faGoogle"
+    "text":" ------------------------ OR ------------------------"
   },
 
   {
@@ -61,29 +59,24 @@
   {
     "id":6,
   "name":"fullname",
-  "type":"text",
+  "type":"input",
   "placeholder":" fullName",
   "class":"un"
 },
 {
   "id":7,
   "name":"mail",
-  "type":"text",
+  "type":"input",
   "placeholder":" Gmail",
   "class":"un"
 },
 {"id":8,
 "name":"message",
-"type":"text",
+"type":"textarea",
 "placeholder":"message",
-"class":"un-diff"
+"class":"undiff"
 }
 
 ]
-
-
-
-
-
 }
 

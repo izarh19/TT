@@ -1,41 +1,46 @@
 body{
 background-color: white;
 }
-.theabout{/*التكست*/
+.theabout{/*text*/
  margin-left:20px;
  width: 660px;
  height:79px;
 text-align: left;
 margin: 35px;
 line-height: 1.6;
+position: absolute;
+top:110px;
 }
 
 .BGI{/*back groung img*/
-position: relative;
+position: absolute;
+visibility: inherit;
 bottom:37px;
-float: right;
-width :200px;
+right: 0px;
+top:45px;
+width :290px;
 height:478px;
 background-image: url('../Img/lineb.jpg');
 background-position:left;
 background-repeat:none;
 
 }
-#about{/*كلمة اباوت*/
+#about{/*the word about*/
 position: relative;
 font-family:"Times New Roman", Times, serif;
 font-size: xx-large;
 top:20px;
 padding-left: 3px;
+right: 550px;
 }
 
 span{/*to style the name About(highlighter)*/
-position: relative;
-left:33px;
+position: absolute;
+
 }
 span h1 {/*highlighter style*/
 border-radius: 0.8em 0.3em;
-padding-left: 88px;
+
 background: transparent;
 background-image: linear-gradient(
 to right,
