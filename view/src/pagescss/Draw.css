@@ -17,8 +17,8 @@ top:44px;
 }
 #eraserwidth{
 position:relative;
-right:400px;
-bottom: 60px;
+right:410px;
+bottom: 240px;
 }
 .btn3{/* the place of 3 buttons*/
 width:270px;
@@ -83,35 +83,16 @@ background-color:rgba(0, 0, 0, 0.85);
 text-align: right;
 padding-right: 100px;
 }
-#brush{
-position:absolute;
-width: 30px;
-height: 30px;
-left: 5px;
-bottom: 10px;
 
-}
-#eraser{
-position: relative;
-width: 27px;
-height: 27px;
-right: 450px;
-bottom: 265px;
-}
+
 #colors{
 position: relative;
 width:30px;
 height:30px;
 right: 480px;
-bottom: 215px;
+bottom: 160px;
 }
-#shaeps{
-position: relative;
-width:30px;
-height:30px;
-right: 510px;
-bottom: 170px;
-}
+
 #ai{
 position: relative;
 width:25px;
@@ -149,51 +130,235 @@ rotate: 180deg;
 }
 
 
+/*about the brush */
 .dropdown {
-display: inline-block;
+  position: relative;
+  display: inline-block;
 }
 
-.dropdown button {/* the button it self where is is place */
-background-color:rgba(0, 0, 0, 0);
-border: none;
-padding: 15px;
-cursor: pointer;
+.dropdown button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 30px;
+  height: 30px;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+}
+
+#brush {
+  width: 30px;
+  height: 30px;
+  position: relative;
+  bottom:260px;
+  right:490px;
+  
+
+}
+#brushwidth {
+  position: relative;
+  right: 0px;
+  top: 0px;
+  padding: 4px;
+}
+#brushscolor {
+  position: relative;
+   right: 0px; 
+   padding:4px;
+}
+.content {
+  position: absolute;
+  bottom:190px ;
+  right: 330px;
+  width: 120px;
+  height:120px;
+  padding: 0px;
+  margin: 0px;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  background-color: whitesmoke;
+  border: 1px solid black;
+  border-radius: 5px;
+  z-index: 1;
+}
+
+.content label {
+  margin-bottom: 10px;
+  padding: 10px;
+  width: 100%;
+  text-align: center;
+}
+
+.content input {/*the color pickerr (the color)*/
+  width: 100%;
+  height: 25px;
+  margin-bottom: 15px;
+
+}
+
+
+.dropdown input[type="checkbox"] {
+  display: none;
+}
+
+.dropdown .content {
+  display: none;
+}
+
+.dropdown input[type="checkbox"]:checked ~ .content {
+  display: block;
+}
+
+
+
+
+
+/* here it all about the shapes */
+
+#toggleShapes {
+display: none; /* Hide the checkbox */
+}
+
+#shapes {
 position: relative;
+width: 30px;
+height: 30px;
+right: 505px;
 bottom: 250px;
-right:510px;
+cursor: pointer;
 }
 
-.dropdown button :hover {
-background-color: rgba(0, 0, 0, 0.85);
-
-}
-.dropdown .content :hover {
-background-color: rgba(212, 210, 210, 0.85);
-
-
-}
-
-.dropdown .content {/*w/out it the inputs are in someplace*/
-display: none;
+.theShapes {
+display: none; /* Hide the dropdown by default */
 position: absolute;
-bottom:360px;
-left:130px;
+left: 165px;
+bottom: 280px; /* Adjust based on the height of the dropdown */
+list-style: none;
+padding: 0;
+margin: 0;
+background-color: white;
+border-radius: 5px;
+width: 100px; /* Adjust width as needed */
 box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+z-index: 1;
 }
 
-.dropdown .content label, .content input {/* the input itself*/
-display: inline-block;
-position: absolute;
-left:0px;
-
+#toggleShapes:checked + label + .theShapes {
+display: block; /* Show the dropdown when the checkbox is checked */
 }
 
-.dropdown:hover .content {/*the box*/
+.theShapes li {
 display: block;
-position: absolute;
-left:160px;
-width:160px;
-height:130px;
-background-color: whitesmoke;
-border:1px solid black;
+padding: 10px;
+border-bottom: 1px solid black;
+}
+
+.theShapes li:hover {
+background-color: rgba(212, 210, 210, 0.85);
+color: black;
+}
+
+
+
+/*erassseerrrrrr*/
+
+.eraser-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+#eraser {
+  width: 30px; /* Adjust as necessary */
+  height: 30px; /* Maintain aspect ratio */
+  cursor: pointer; /* Indicate it's clickable */
+  position: relative;
+  right: 260px;
+  bottom: 80px;
+}
+
+#toeraser {
+  display: none; /* Hide the checkbox */
+}
+
+#toeraser:checked + label +.dropdown-content {
+  display: block; /* Show the dropdown when the checkbox is checked */
+}
+
+.dropdown-content {
+  display: none; /* Hidden by default */
+  position: absolute;
+  bottom: 150px; /* Adjust based on your layout */
+  right: 360px; /* Align with eraser icon */
+  width: 120px; /* Fixed width */
+  background-color: #fff; /* White background */
+  border: 1px solid #ccc; /* Soft border */
+  border-radius: 5px; /* Rounded corners */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  z-index: 1;
+  border: 1px solid black;
+}
+
+.dropdown-content label {
+  padding: 8px; /* Space inside labels */
+  display: block; /* Stack labels */
+  cursor: pointer; /* Indicate clickable */
+}
+
+.dropdown-content label:hover {
+  background-color: #f0f0f0; /* Highlight on hover */
+}
+
+.dropdown-content input {
+  width: calc(100% - 10px); /* Full width with padding */
+  margin: 5px; /* Space around input */
+}
+
+#eraserwidth {
+  margin-left: 0px; 
+  position: relative;
+  right: 0px;
+ bottom: 0px;
+  padding: 0px;
+  width: 100%; 
+}
+
+.warrpall {
+  background-color: red; 
+  width: 20%;
+  position: absolute;
+  bottom: 200px;
+  left: 20px;
+  padding: 20px;
+  box-sizing: border-box;
+  border: 2px solid white;
+  border-radius: 10px;
+}
+
+.label-container {/* Stack label and input vertically */
+  display: flex;
+  flex-direction: column; 
+  margin-bottom: 10px;
+  color: white; 
+}
+
+label {/* Space between label and input */
+  margin-bottom: 5px; 
+}
+
+input[type="number"],
+select {
+  width: 100%; 
+  padding: 5px; 
+  box-sizing: border-box; 
+  border-radius: 5px; 
+}
+
+#border{
+  background-color: rgb(21, 2, 2); 
+  width: 20%;
+
+  padding: 20px;
+  box-sizing: border-box;
+  border: 2px solid white;
+  border-radius: 10px;
 }

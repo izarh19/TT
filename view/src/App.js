@@ -21,7 +21,9 @@ import Signup from "./pages/Signup";
 import Explore from "./pages/Explore";
 import HowItWorks from "./pages/HowItWorks";
 import Draw from "./pages/Draw";
+import Download from './pages/Download';
 import axios from 'axios';
+
 
 function App() {
 
@@ -43,6 +45,8 @@ function App() {
           <Route  path="/About" element={< About/>} />
           <Route  path="/Home" element={<Home/>} />
           <Route  path="/Draw" element={<Draw/>} />
+          <Route  path="/Download" element={<Download/>} />
+          
 
       </Routes>
     </BrowserRouter>

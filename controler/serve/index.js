@@ -9,15 +9,16 @@ const {page }=require("../../model/Pages");
 const formid =require("../../model/Forms");
 const menuid =require("../../model/Menus");
 const {inputsform} = require("../../model/form_input");
+const users =require("../../model/Users")
+
 
 
 
 app.use('/text/:id',async (req,res) => {/* the text json */////*** DONE (ABOUT)** */
 const pageID = req.params.id;/* i requst this param from page Id */
-console.log(pageID);
+
 try{
   const Pages= await page(pageID);
-  console.log(Pages[0]);
   if (Pages) {/* if its there return it and if not return error */
     res.json(Pages[0]);
   } else {
@@ -35,10 +36,10 @@ app.use('/inputs/:formID', async (req, res) => {
   const formid = req.params.formID; // Get formID from URL parameter
   try {
     const input = await inputsform(formid); // Fetch inputs form the formID(promis)
-    console.log(input);
+
     if (input){
     res.json(input);
-    console.log("soul");
+    
     }else{
       res.status(404).json({ error: 'Page not found' });
     } 
@@ -68,6 +69,8 @@ app.use('/hf/:id', async (req, res) => {/** DONE MENUES  */
 });
 
 
+
+ 
 app.use('/formall/:formID', async (req, res) => {
   try {
     const formID = req.params.formID;
@@ -83,7 +86,38 @@ app.use('/formall/:formID', async (req, res) => {
     res.status(500).json({ error: 'An error occurred while fetching menus' });
   }
 })
- 
+
+
+app.use('/user/login', async (req, res) => {
+  try {
+    const { userName, userPassword } = req.body; 
+    const userData = await users.login(userName, userPassword);
+    if(userData.length >0){
+    res.json(true);
+    }else{
+    res.status(404).json(error = 'false ');
+    }
+  } catch (error) {
+    console.error("Error fetching menus:", error);
+    res.status(500).json({ error: 'An error occurred while fetching menus' });
+  }
+})
+
+app.use('/user/signup', async (req, res) => {
+  try {
+    const { userName, userPassword ,userGmail} = req.body; 
+    const user = await users.signup(userName, userPassword,userGmail);
+    if(user.length>0){
+    res.json(true);
+    }else{
+    res.status(404).json(error = 'false7 ');
+    }
+  } catch (error) {
+    console.error("Error fetching menus:", error);
+    res.status(500).json({ error: 'An error occurred while fetching menus' });
+  }
+})
+
 
 app.listen(PORT, () => {
   console.log(`Server listening on ${PORT}`);
