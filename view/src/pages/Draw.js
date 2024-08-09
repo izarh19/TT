@@ -1,35 +1,27 @@
 import React, { Component } from "react";
 import "../pagescss/Draw.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFolder } from "@fortawesome/free-solid-svg-icons";
 import { motion } from "framer-motion";
-
 
 export default class Draw extends Component {
   constructor(props) {
     super(props);
     this.state = {
       drawPage: [],
-      setBrushColor: "#000000",
-      setBrushWidth: 5,
-      setEraserWidth: 5,
-      isDrawing: false,
-      isErasing: false,
-      selectedShape: "",
+      setBrushColor: "black",
+      selectedShape: "Rectangle",
       drawings: [],
+      isDrawing: false,
       motionType: "ROTATE",
       rotate: 0,
-      x: 0,
-      y: 0,
+      x: 100,
+      y: 100,
       speed: 1,
       playAnimation: false,
+      currentDrawing: null,
+      initialMousePosition: { x: 0, y: 0 },
     };
     this.canvasRef = React.createRef();
-    this.shapeRefs = [];
-    this.ctx = null;
-    this.startX = 0;
-    this.startY = 0;
-    this.savedImageData = null;
   }
 
   componentDidMount() {
@@ -38,182 +30,133 @@ export default class Draw extends Component {
       .then((data) => {
         this.setState({ drawPage: data });
         this.ctx = this.canvasRef.current.getContext("2d");
-        this.ctx.fillStyle = "#fff";
+        this.ctx.fillStyle = this.state.setBrushColor;
         this.ctx.lineCap = "round";
       })
       .catch((error) => console.error("Error fetching header page data:", error));
   }
 
-  updateBrushSettings = () => {
-    if (this.ctx) {
-      this.ctx.strokeStyle = this.state.setBrushColor;
-      this.ctx.lineWidth = this.state.isErasing
-        ? this.state.setEraserWidth
-        : this.state.setBrushWidth;
-    }
-  };
-
-  drawShape = (shape, startX, startY, endX, endY) => {
-    const width = endX - startX;
-    const height = endY - startY;
-    const radius = Math.sqrt(width ** 2 + height ** 2);
-    const sideLength = Math.min(Math.abs(width), Math.abs(height));
-
-    const drawing = {
-      type: 'shape',
-      shape,
-      startX,
-      startY,
-      endX,
-      endY,
-      width,
-      height,
-      radius,
-      sideLength,
-      brushColor: this.state.setBrushColor,
-      brushWidth: this.state.setBrushWidth,
-    };
-
-    this.setState((prevState) => ({
-      drawings: [...prevState.drawings, drawing ],
-    }));
-
-    if (this.ctx) {
-      this.ctx.fillStyle = this.state.setBrushColor;
-      this.ctx.strokeStyle = this.state.setBrushColor;
-      this.ctx.lineWidth = this.state.setBrushWidth;
-
-      this.ctx.beginPath();
-      switch (shape) {
-        case "Circle":
-          const radius = Math.sqrt(width * width + height * height); // Dynamic radius
-          this.ctx.beginPath();
-          this.ctx.arc(startX, startY, radius, 0, 2 * Math.PI);
-          this.ctx.fill();
-          this.ctx.stroke();
-          break;
-        case "Rectangle":
-          this.ctx.beginPath();
-          this.ctx.rect(startX, startY, width, height);
-          this.ctx.fill();
-          this.ctx.stroke();
-          break;
-        case "Triangle":
-          this.ctx.beginPath();
-          this.ctx.moveTo(startX, startY);
-          this.ctx.lineTo(endX, endY);
-          this.ctx.lineTo(startX - width, endY);
-          this.ctx.closePath();
-          this.ctx.fill();
-          this.ctx.stroke();
-          break;
-        case "Square":
-          const sideLength = Math.min(Math.abs(width), Math.abs(height)); // Ensure square dimensions
-          this.ctx.beginPath();
-          this.ctx.rect(
-            startX,
-            startY,
-            sideLength * Math.sign(width),
-            sideLength * Math.sign(height)
-          );
-          this.ctx.fill();
-          this.ctx.stroke();
-          break;
-        default:
-          break;
-      }}
-    };
-  
-
   handleMouseDown = (e) => {
-    const { offsetX, offsetY } = e.nativeEvent;
-    if (this.ctx) {
-      this.ctx.globalCompositeOperation = this.state.isErasing
-        ? "destination-out"
-        : "source-over";
-    }
-    this.setState({ isDrawing: true });
-    this.startX = offsetX;
-    this.startY = offsetY;
-    this.savedImageData = this.ctx?.getImageData(
-      0,
-      0,
-      this.canvasRef.current.width,
-      this.canvasRef.current.height
-    );
+    const { clientX, clientY } = e;
+    const rect = e.target.getBoundingClientRect();
+    const initialPosition = { x: clientX - rect.left, y: clientY - rect.top };
+    const newDrawing = this.createDrawing(initialPosition.x, initialPosition.y, 0);
+
+    this.setState({
+      isDrawing: true,
+      initialMousePosition: initialPosition,
+      currentDrawing: newDrawing,
+    });
   };
 
-  handleMouseUp = (e) => {
+  handleMouseUp = () => {
     if (this.state.isDrawing) {
-      const { offsetX, offsetY } = e.nativeEvent;
-      if (this.state.selectedShape) {
-        this.drawShape(
-          this.state.selectedShape,
-          this.startX,
-          this.startY,
-          offsetX,
-          offsetY
-        );
-      } else {
-        const drawing = {
-          type: 'freehand',
-          path: this.ctx?.getImageData(
-            0,
-            0,
-            this.canvasRef.current.width,
-            this.canvasRef.current.height
-          ),
-          brushColor: this.state.setBrushColor,
-          brushWidth: this.state.setBrushWidth,
-        };
-        this.setState((prevState) => ({
-          drawings: [...prevState.drawings, drawing],
-        }));
-      }
-      this.setState({ isDrawing: false });
-    }
-  };
-
-  handleMouseMove = (e) => {
-    if (!this.state.isDrawing) return;
-    const { offsetX, offsetY } = e.nativeEvent;
-    const startX = this.startX || offsetX;
-    const startY = this.startY || offsetY;
-    const endX = offsetX;
-    const endY = offsetY;
-
-    this.ctx.globalCompositeOperation = this.state.isErasing
-      ? "destination-out"
-      : "source-over";
-    this.updateBrushSettings();
-
-    if (this.state.selectedShape) {
-      this.ctx.putImageData(this.savedImageData, 0, 0);
-      this.drawShape(this.state.selectedShape, startX, startY, offsetX, offsetY);
-    } else {
-      this.ctx.beginPath();
-      this.ctx.moveTo(this.startX, this.startY);
-      this.ctx.lineTo(offsetX, offsetY);
-      this.ctx.stroke();
-      this.startX = offsetX;
-      this.startY = offsetY;
       this.setState((prevState) => ({
-        drawings: [
-          ...prevState.drawings,
-          { shape: "Line", startX, startY, endX, endY },
-        ],
+        isDrawing: false,
+        drawings: [...prevState.drawings, prevState.currentDrawing],
+        currentDrawing: null,
       }));
     }
   };
 
+  handleMouseMove = (e) => {
+    if (this.state.isDrawing) {
+      const { clientX, clientY } = e;
+      const rect = this.canvasRef.current.getBoundingClientRect();
+      const mouseX = clientX - rect.left;
+      const mouseY = clientY - rect.top;
+      const distance = this.calculateDistance(
+        this.state.initialMousePosition.x,
+        this.state.initialMousePosition.y,
+        mouseX,
+        mouseY
+      );
 
-  handleShapeChange = (shape) => this.setState({ selectedShape: shape });
-  handleEraserClick = () => this.setState({ isErasing: true, selectedShape: "" });
-  handleBrushClick = () => this.setState({ isErasing: false, selectedShape: "" });
+      const updatedDrawing = this.createDrawing(
+        this.state.initialMousePosition.x,
+        this.state.initialMousePosition.y,
+        distance
+      );
+
+      // Clear canvas and redraw
+      this.ctx.clearRect(0, 0, this.canvasRef.current.width, this.canvasRef.current.height);
+      this.renderDrawing(updatedDrawing);
+      this.setState({ currentDrawing: updatedDrawing });
+    }
+  };
+
+  calculateDistance = (x1, y1, x2, y2) => {
+    return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+  };
+
+  createDrawing = (startX, startY, size) => {
+    const canvasWidth = this.canvasRef.current.width;
+    const canvasHeight = this.canvasRef.current.height;
+
+    let adjustedSize = size;
+    if (startX - adjustedSize / 2 < 0) {
+      adjustedSize = startX * 2;
+    }
+    if (startY - adjustedSize / 2 < 0) {
+      adjustedSize = startY * 2;
+    }
+    if (startX + adjustedSize / 2 > canvasWidth) {
+      adjustedSize = (canvasWidth - startX) * 2;
+    }
+    if (startY + adjustedSize / 2 > canvasHeight) {
+      adjustedSize = (canvasHeight - startY) * 2;
+    }
+
+    return {
+      type: this.state.selectedShape,
+      startX: Math.max(0, startX - adjustedSize / 2),
+      startY: Math.max(0, startY - adjustedSize / 2),
+      size: adjustedSize,
+      color: this.state.setBrushColor,
+    };
+  };
+
+  renderDrawing = (drawing) => {
+    const { startX, startY, size, color, type } = drawing;
+    const ctx = this.ctx;
+
+    ctx.fillStyle = color;
+    ctx.strokeStyle = color;
+
+    switch (type) {
+      case "Circle":
+        
+        ctx.beginPath();
+        ctx.arc(startX + size / 2, startY + size / 2, size / 2, 0, 2 * Math.PI);
+        ctx.fill();
+        break;
+
+      case "Rectangle":
+      case "Square":
+        ctx.beginPath();
+        ctx.rect(startX, startY, size, size);
+        ctx.fill();
+        break;
+
+      case "Triangle":
+        ctx.beginPath();
+        ctx.moveTo(startX, startY + size);
+        ctx.lineTo(startX + size / 2, startY);
+        ctx.lineTo(startX + size, startY + size);
+        ctx.closePath();
+        ctx.fill();
+        break;
+
+      default:
+        break;
+    }
+  };
+  motion =(sha)=>{
+    this.setState({drawing : <motion.div createDrawing></motion.div>})
+  }
 
   handleMotionTypeChange = (event) => {
-    const motionType = event.target.value;
-    this.setState({ motionType, playAnimation: false });
+    this.setState({ motionType: event.target.value });
   };
 
   handleRotateChange = (event) => {
@@ -236,41 +179,27 @@ export default class Draw extends Component {
     this.setState({ playAnimation: true });
   };
 
-  render() {
-    const {drawPage,setBrushColor,setBrushWidth,setEraserWidth,motionType,rotate,x,y,speed, playAnimation,drawings, } = this.state;
-    const animationProps = playAnimation ? motionType === "ROTATE" ? { rotate: `${rotate}deg` } : { x, y } : {};
-    
-    return (
-      <div>
-      <canvas
-      ref={this.canvasRef}
-      width={900}
-      height={470}
-      onMouseDown={this.handleMouseDown}
-      onMouseUp={this.handleMouseUp}
-      onMouseMove={this.handleMouseMove}
-      style={{ border: '1px solid #000' }}
-    />
-  {this.state.drawings.map((drawing, index) => (
-  <motion.div
-    key={index}
-    initial={this.state.motionType === 'ROTATE' ? { rotate: 0 } : { x: 0, y: 0 }}
-    animate={this.state.playAnimation ? animationProps : {}}
-    transition={{ duration: this.state.speed }}
-    style={{
-      position: 'absolute',
-      left: drawing.startX,
-      top: drawing.startY,
-      width: drawing.width,
-      height: drawing.height,
-      borderRadius: drawing.shape === 'Circle' ? '50%' : 0,
-      backgroundColor: drawing.brushColor,
-      border: `${drawing.brushWidth}px solid ${drawing.brushColor}`,
-    }}
-  />
-))}
+  handleShapeChange = (shape) => {
+    this.setState({ selectedShape: shape });
+  };
 
-          
+  render() {
+    const { sha,drawPage, setBrushColor, motionType, rotate, x, y, speed, playAnimation, drawings, currentDrawing } = this.state;
+
+    return (
+      <div style={{ backgroundColor: "rgba(238, 238, 238, 1)", minHeight: "100vh", width: "100vw", overflow: "hidden" }}>
+        <canvas
+          ref={this.canvasRef}
+          width={900}
+          height={470}
+          onMouseDown={this.handleMouseDown}
+          onMouseUp={this.handleMouseUp}
+          onMouseMove={this.handleMouseMove}
+          style={{ border: "1px solid #000" }}
+          motion={this.sha}
+        />
+        
+
         <div className="warrpall">
           <label className="select">
             Motion:
@@ -282,16 +211,19 @@ export default class Draw extends Component {
 
           {motionType === "ROTATE" && (
             <div>
-              <label htmlFor="input_rotate"> Rotate:
+              <label htmlFor="input_rotate">
+                Rotate:
                 <input
                   type="number"
                   value={rotate}
                   onChange={this.handleRotateChange}
                   min={-360}
                   max={360}
+                  id="input_rotate"
                 />
               </label>
-              <label htmlFor="input_speed"> Speed (seconds):
+              <label>
+                Speed (seconds):
                 <input
                   type="number"
                   value={speed}
@@ -328,11 +260,20 @@ export default class Draw extends Component {
 
           <button onClick={this.handlePlayAnimation}>Play Animation</button>
         </div>
-        
+
+        <div>
+          {drawings.map((drawing, index) => (
+            <React.Fragment key={index}>{this.renderDrawing(drawing)}</React.Fragment>
+          ))}
+          {currentDrawing && this.renderDrawing(currentDrawing)}
+        </div>
+
         {drawPage.map((Dr) => (
           <div key={Dr.inputID} className="btn3">
             <ul>
-              <li><button className={Dr.inputCssClass}>{Dr.inputTitle}</button></li>
+              <li>
+                <button className={Dr.inputCssClass}>{Dr.inputTitle}</button>
+              </li>
             </ul>
           </div>
         ))}
@@ -345,8 +286,6 @@ export default class Draw extends Component {
           <div className="content">
             <label htmlFor="brushColor">Brush Color:</label>
             <input id="brushColor" type="color" value={setBrushColor} onChange={(e) => this.setState({ setBrushColor: e.target.value })} />
-            <label htmlFor="brushWidth">Brush Width:</label>
-            <input id="brushWidth" type="range" min="1" max="100" value={setBrushWidth} onChange={(e) => this.setState({ setBrushWidth: e.target.value })} />
           </div>
         </div>
 
@@ -357,7 +296,7 @@ export default class Draw extends Component {
           </label>
           <div className="dropdown-content">
             <label htmlFor="eraserWidth">Eraser Width:</label>
-            <input id="eraserWidth" type="range" min="1" max="100" value={setEraserWidth} onChange={(e) => this.setState({ setEraserWidth: e.target.value })} />
+            <input id="eraserWidth" type="range" min="1" max="100" value={this.state.setEraserWidth} onChange={(e) => this.setState({ setEraserWidth: e.target.value })} />
           </div>
         </div>
 
@@ -367,7 +306,7 @@ export default class Draw extends Component {
             <img id="shapes" src="https://img.icons8.com/?size=100&id=dN8m9joMwymk&format=png&color=000000" alt="Shapes" />
           </label>
           <ul className="theShapes">
-            {["Circle", "Rectangle", "Triangle", "Square"].map(shape => (
+            {["Circle", "Rectangle", "Triangle", "Square"].map((shape) => (
               <li key={shape} onClick={() => this.handleShapeChange(shape)}>{shape}</li>
             ))}
           </ul>
@@ -385,7 +324,7 @@ export default class Draw extends Component {
         </div>
 
         <div id="folder">
-          <FontAwesomeIcon icon={faFolder} size="2xl" style={{ color: "#FFD43B" }} />
+        
           <br />
           folder1
         </div>
