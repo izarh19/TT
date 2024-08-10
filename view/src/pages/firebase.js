@@ -33,9 +33,10 @@ export default class FireBase extends Component {
   uploadImage = async (file) => {
     if (!file) return;
 
-    // Create a reference to 'images/file.name'
-    const storageRef = ref(this.storage, `images/${file.name}`);
-    console.log("Uploading file:", file.name); // Log the file name being uploaded
+    // Create a unique file name using a timestamp
+    const uniqueName = `${Date.now()}-${file.name}`;
+    const storageRef = ref(this.storage, `images/${uniqueName}`);
+    console.log("Uploading file:", uniqueName); // Log the file name being uploaded
 
     // Upload the file
     try {

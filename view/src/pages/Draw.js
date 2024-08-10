@@ -5,6 +5,7 @@ import FireBase from "./firebase"; // Import the combined component
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFolder } from "@fortawesome/free-solid-svg-icons";
 
+
 export default class Draw extends Component {
   constructor(props) {
     super(props);
@@ -25,6 +26,8 @@ export default class Draw extends Component {
       fileToUpload: null, // To hold the file to upload
       shouldUpload: false,
       uploadedImageUrl: "", // To store the image URL after upload
+      isMotionApplied: false, // Track if motion is applied
+      
     };
     this.canvasRef = React.createRef();
   }
@@ -169,11 +172,122 @@ export default class Draw extends Component {
 
     ctx.restore();
   };
+ startRecording = () => {
+    const canvas = this.canvasRef.current;
+    const stream = canvas.captureStream(); // Capture the canvas stream
+    this.mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+    this.chunks = [];
+  
+    this.mediaRecorder.ondataavailable = (e) => {
+      if (e.data.size > 0) {
+        this.chunks.push(e.data);
+      }
+    };
+  
+    this.mediaRecorder.onstop = this.saveVideo;
+  
+    this.mediaRecorder.start();
+  };
 
+  handleButtonClick = async (inputID) => {
+    console.log(`Button with inputID ${inputID} clicked`);
+  
+    if (inputID === 9) {
+      const canvas = this.canvasRef.current;
+      if (this.state.isMotionApplied) {
+        // Save as video
+        this.saveAsVideo(canvas);
+      } else {
+        // Save as image
+        this.saveAsImage(canvas);
+      }
+  
+      this.ctx.clearRect(0, 0, canvas.width, canvas.height);
+      this.setState({ drawings: [], isMotionApplied: false });
+    } else {
+      this.setState({ shouldUpload: false });
+    }
+  };
+  
+  saveAsImage = (canvas) => {
+    canvas.toBlob(async (blob) => {
+      const file = new File([blob], `canvas-drawing.png`, { type: "image/png" });
+      console.log(file); // Check if the file is created correctly
+      this.setState({ fileToUpload: file, shouldUpload: true });
+  
+      const firebase = new FireBase();
+      const downloadURL = await firebase.uploadImage(file);
+      console.log("Download URL:", downloadURL);
+  
+      this.setState({ uploadedImageUrl: downloadURL });
+    });
+  };
+  
+  saveAsVideo = () => {
+    const canvasStream = this.canvasRef.current.captureStream();
+    this.mediaRecorder = new MediaRecorder(canvasStream, { mimeType: 'video/webm' });
+  
+    this.chunks = []; // Initialize chunks array to store video data
+  
+    this.mediaRecorder.ondataavailable = (event) => {
+      if (event.data.size > 0) {
+        this.chunks.push(event.data);
+      }
+    };
+  
+    this.mediaRecorder.onstop = async () => {
+      const videoBlob = new Blob(this.chunks, { type: 'video/webm' });
+      const videoFile = new File([videoBlob], 'canvas-animation.webm', { type: 'video/webm' });
+  
+      const thumbnailFile = await this.generateThumbnail(videoBlob);
+      this.uploadFiles(thumbnailFile, videoFile);
+    };
+  
+    this.mediaRecorder.start();
+  
+    // Stop recording after the animation duration
+    setTimeout(() => {
+      this.mediaRecorder.stop();
+    }, this.state.speed * 1000);
+  };
+  
+  
+  generateThumbnail = (videoBlob) => {
+    return new Promise((resolve) => {
+      const video = document.createElement('video');
+      video.src = URL.createObjectURL(videoBlob);
+  
+      video.addEventListener('loadeddata', () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+  
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  
+        canvas.toBlob(blob => resolve(new File([blob], 'thumbnail.png', { type: 'image/png' })));
+      });
+    });
+  };
+  
+  uploadFiles = async (thumbnailFile, videoFile) => {
+    const firebase = new FireBase();
+  
+    const thumbnailURL = await firebase.uploadImage(thumbnailFile);
+    const videoURL = await firebase.uploadImage(videoFile);
+  
+    this.setState({ uploadedImageUrl: thumbnailURL, videoURL });
+  };
+  
+  
+  
   handlePlayAnimation = () => {
-    const { motionType, rotate, x, y, speed, drawings } = this.state;
-
+    const { motionType, rotate, x, y, speed, drawings,isVideoPlaying } = this.state;
+  
     if (drawings.length > 0) {
+      this.setState({ isMotionApplied: true });
+      this.startRecording(); // Start recording
+  
       anime({
         targets: drawings,
         duration: speed * 1000,
@@ -181,24 +295,28 @@ export default class Draw extends Component {
         update: (anim) => {
           const updatedDrawings = drawings.map((drawing) => {
             const newDrawing = { ...drawing };
-
+  
             if (motionType === "ROTATE") {
               newDrawing.angle = (rotate * Math.PI / 180) * (anim.progress / 100);
             } else if (motionType === "LINEAR") {
               newDrawing.startX += (x * anim.progress) / 100;
               newDrawing.startY += (y * anim.progress) / 100;
             }
-
+  
             return newDrawing;
           });
-
+  
           this.setState({ drawings: updatedDrawings }, () => {
             this.renderAllDrawings(updatedDrawings);
           });
         },
+        complete: () => {
+          this.mediaRecorder.stop(); // Stop recording when the animation is complete
+        },
       });
     }
   };
+  
 
   handleMotionTypeChange = (event) => {
     this.setState({ motionType: event.target.value });
@@ -224,31 +342,9 @@ export default class Draw extends Component {
     this.setState({ selectedShape: shape });
   };
 
-  handleButtonClick = async (inputID) => {
-    console.log(`Button with inputID ${inputID} clicked`);
-
-    if (inputID === 9) {
-      const canvas = this.canvasRef.current;
-      canvas.toBlob(async (blob) => {
-        const file = new File([blob], "canvas-drawing.png", { type: "image/png" });
-        console.log(file); // Check if the file is created correctly
-        this.setState({ fileToUpload: file, shouldUpload: true });
-
-        // Upload the file and get the download URL
-        const firebase = new FireBase({ file });
-        const downloadURL = await firebase.uploadImage(file);
-        console.log("Download URL:", downloadURL);
-
-        // Set the uploaded image URL in the state to render it later
-        this.setState({ uploadedImageUrl: downloadURL });
-      });
-    } else {
-      this.setState({ shouldUpload: false });
-    }
-  };
 
   render() {
-    const { drawPage, motionType, rotate, x, y, speed, uploadedImageUrl } = this.state;
+    const { drawPage, isMotionApplied,motionType, rotate, x, y, speed, uploadedImageUrl ,isVideoPlaying,videoURL} = this.state;
 
     return (
       <div style={{ backgroundColor: "rgba(238, 238, 238, 1)", minHeight: "100vh", width: "100vw", overflow: "hidden" }}>
@@ -333,14 +429,26 @@ export default class Draw extends Component {
               <li><button onClick={() => this.handleButtonClick(Dr.inputID)} className={Dr.inputCssClass}>{Dr.inputTitle}</button></li>
             </ul>
 
-            {/* Display the uploaded image if inputID === 12 */}
-            {Dr.inputID === 12 && uploadedImageUrl && (
-              <div className="uploaded-image-container">
-                <img src={uploadedImageUrl} alt="Uploaded Drawing" style={{ border: "1px solid #000", width: "100%", height: "auto" }} />
-              </div>
-            )}
-          </div>
-        ))}
+               {/* Display the thumbnail or video */}
+               {Dr.inputID === 12 && (
+            <div className="uploaded-image-container">
+              {isVideoPlaying && videoURL ? (
+                <video controls style={{ border: "1px solid #000", width: "100%", height: "auto" }} onClick={() => this.setState({ isVideoPlaying: false })}>
+                  <source src={videoURL} type="video/webm" />
+                  Your browser does not support the video tag.
+                </video>
+              ) : (
+                <img 
+                  src={uploadedImageUrl || videoURL} 
+                  alt="Thumbnail" 
+                  style={{ border: "1px solid #000", width: "100%", height: "auto", cursor: "pointer" }}
+                  onClick={() => this.setState({ isVideoPlaying: !!videoURL })}
+                />
+              )}
+            </div>
+          )}
+        </div>
+      ))}
 
         <div className="dropdown">
           <input type="checkbox" id="toggleBrush" />
