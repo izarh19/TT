@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import "../pagescss/Draw.css";
 import anime from "animejs";
+import FireBase from "./firebase"; // Import the combined component
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFolder } from "@fortawesome/free-solid-svg-icons";
 
@@ -21,6 +22,9 @@ export default class Draw extends Component {
       playAnimation: false,
       currentDrawing: null,
       initialMousePosition: { x: 0, y: 0 },
+      fileToUpload: null, // To hold the file to upload
+      shouldUpload: false,
+      uploadedImageUrl: "", // To store the image URL after upload
     };
     this.canvasRef = React.createRef();
   }
@@ -220,9 +224,31 @@ export default class Draw extends Component {
     this.setState({ selectedShape: shape });
   };
 
+  handleButtonClick = async (inputID) => {
+    console.log(`Button with inputID ${inputID} clicked`);
+
+    if (inputID === 9) {
+      const canvas = this.canvasRef.current;
+      canvas.toBlob(async (blob) => {
+        const file = new File([blob], "canvas-drawing.png", { type: "image/png" });
+        console.log(file); // Check if the file is created correctly
+        this.setState({ fileToUpload: file, shouldUpload: true });
+
+        // Upload the file and get the download URL
+        const firebase = new FireBase({ file });
+        const downloadURL = await firebase.uploadImage(file);
+        console.log("Download URL:", downloadURL);
+
+        // Set the uploaded image URL in the state to render it later
+        this.setState({ uploadedImageUrl: downloadURL });
+      });
+    } else {
+      this.setState({ shouldUpload: false });
+    }
+  };
 
   render() {
-    const { drawPage, motionType, rotate, x, y, speed } = this.state;
+    const { drawPage, motionType, rotate, x, y, speed, uploadedImageUrl } = this.state;
 
     return (
       <div style={{ backgroundColor: "rgba(238, 238, 238, 1)", minHeight: "100vh", width: "100vw", overflow: "hidden" }}>
@@ -304,11 +330,19 @@ export default class Draw extends Component {
         {drawPage.map((Dr) => (
           <div key={Dr.inputID} className="btn3">
             <ul>
-              <li><button className={Dr.inputCssClass}>{Dr.inputTitle}</button></li>
+              <li><button onClick={() => this.handleButtonClick(Dr.inputID)} className={Dr.inputCssClass}>{Dr.inputTitle}</button></li>
             </ul>
+
+            {/* Display the uploaded image if inputID === 12 */}
+            {Dr.inputID === 12 && uploadedImageUrl && (
+              <div className="uploaded-image-container">
+                <img src={uploadedImageUrl} alt="Uploaded Drawing" style={{ border: "1px solid #000", width: "100%", height: "auto" }} />
+              </div>
+            )}
           </div>
         ))}
-           <div className="dropdown">
+
+        <div className="dropdown">
           <input type="checkbox" id="toggleBrush" />
           <label htmlFor="toggleBrush" onClick={this.handleBrushClick}>
             <img id="brush" src="https://img.icons8.com/?size=100&id=13437&format=png&color=000000" alt="" />
