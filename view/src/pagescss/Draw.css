@@ -40,8 +40,10 @@ height: 35px;
 color: #fefefe;
 font-family:"Times New Roman", Times, serif;
 font-size: medium;
+z-index: 1;
 
 }
+
 .normalb-play{/* the play button*/
 border-radius:10px;
 width: 100px;
@@ -75,14 +77,22 @@ width:900px;
 bottom: 320px;
 height: 70px;
 left:260px;
-color: #fefefe;
-font-family:"Times New Roman", Times, serif;
-font-size: medium;
+padding-right: 100px;
+}
+
+.bt3_save{
+position: relative;
+width:900px;
+bottom: 393px;
+height: 70px;
+left:260px;
+
 border:solid rgb(0, 0, 0) 1.5px;
 background-color:rgba(0, 0, 0, 0.85);
 text-align: right;
 padding-right: 100px;
 }
+
 
 
 #colors{
@@ -108,12 +118,7 @@ height:20px;
 right: 560px;
 bottom: 90px;
 }
-#folder{
-position:absolute;
-bottom: 520px;
-left:1120px;
-color:white;
-}
+
 
 #next{
 position:relative;

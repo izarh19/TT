@@ -1,10 +1,8 @@
 import React, { Component } from "react";
 import "../pagescss/Draw.css";
 import anime from "animejs";
-import FireBase from "./firebase"; // Import the combined component
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFolder } from "@fortawesome/free-solid-svg-icons";
-
+import FireBase from "./firebase";
+import Download from "./Download";
 
 export default class Draw extends Component {
   constructor(props) {
@@ -12,7 +10,8 @@ export default class Draw extends Component {
     this.state = {
       drawPage: [],
       setBrushColor: "black",
-      selectedShape: "Rectangle",
+      setBrushWidth: 5, // Brush width state
+      selectedShape: null, // Default to null for freehand drawing
       drawings: [],
       isDrawing: false,
       motionType: "ROTATE",
@@ -23,11 +22,11 @@ export default class Draw extends Component {
       playAnimation: false,
       currentDrawing: null,
       initialMousePosition: { x: 0, y: 0 },
-      fileToUpload: null, // To hold the file to upload
-      shouldUpload: false,
-      uploadedImageUrl: "", // To store the image URL after upload
-      isMotionApplied: false, // Track if motion is applied
-      
+      imageUrls: [],
+      videoUrls: [],
+      isMotionApplied: false,
+      isRecording: false,
+      chunks: [],
     };
     this.canvasRef = React.createRef();
   }
@@ -38,8 +37,11 @@ export default class Draw extends Component {
       .then((data) => {
         this.setState({ drawPage: data });
         this.ctx = this.canvasRef.current.getContext("2d");
-        this.ctx.fillStyle = this.state.setBrushColor;
+        this.ctx.fillStyle = "#fff";
         this.ctx.lineCap = "round";
+        this.ctx.strokeStyle = this.state.setBrushColor;
+        this.ctx.lineWidth = this.state.setBrushWidth;
+
       })
       .catch((error) => console.error("Error fetching header page data:", error));
   }
@@ -52,8 +54,12 @@ export default class Draw extends Component {
     this.setState({
       isDrawing: true,
       initialMousePosition: initialPosition,
-      currentDrawing: this.createDrawing(initialPosition.x, initialPosition.y, initialPosition.x, initialPosition.y),
+      startX: initialPosition.x,
+      startY: initialPosition.y,
     });
+
+    // Save current canvas state for shape drawing
+    this.savedImageData = this.ctx.getImageData(0, 0, this.canvasRef.current.width, this.canvasRef.current.height);
   };
 
   handleMouseUp = () => {
@@ -63,231 +69,117 @@ export default class Draw extends Component {
         drawings: [...prevState.drawings, prevState.currentDrawing],
         currentDrawing: null,
       }));
+      this.ctx.beginPath(); // Resets the path for freehand drawing
     }
   };
 
   handleMouseMove = (e) => {
-    if (this.state.isDrawing) {
-      const { clientX, clientY } = e;
-      const rect = this.canvasRef.current.getBoundingClientRect();
-      const mouseX = clientX - rect.left;
-      const mouseY = clientY - rect.top;
+    if (!this.state.isDrawing) return;
 
-      const updatedDrawing = this.createDrawing(
-        this.state.initialMousePosition.x,
-        this.state.initialMousePosition.y,
-        mouseX,
-        mouseY
-      );
+    const { clientX, clientY } = e;
+    const rect = this.canvasRef.current.getBoundingClientRect();
+    const offsetX = clientX - rect.left;
+    const offsetY = clientY - rect.top;
 
-      this.renderAllDrawings([...this.state.drawings, updatedDrawing]);
-      this.setState({ currentDrawing: updatedDrawing });
-    }
-  };
+    const { setBrushColor, setBrushWidth, selectedShape, startX, startY } = this.state;
 
-  createDrawing = (startX, startY, currentX, currentY) => {
-    const width = currentX - startX;
-    const height = currentY - startY;
-    const flipVertically = currentY < startY;
+    this.ctx.strokeStyle = setBrushColor;
+    this.ctx.lineWidth = setBrushWidth;
+    this.ctx.lineJoin = "round"; // Join lines with rounded edges
+    this.ctx.lineCap = "round"; // End lines with rounded edges
 
-    return {
-      type: this.state.selectedShape,
-      startX: startX,
-      startY: startY,
-      width: width,
-      height: height,
-      color: this.state.setBrushColor,
-      flipVertically: flipVertically,
-      angle: 0, // Ensure the angle starts at 0
-    };
-  };
-
-  renderAllDrawings = (drawings) => {
-    this.ctx.clearRect(0, 0, this.canvasRef.current.width, this.canvasRef.current.height);
-
-    drawings.forEach((drawing) => {
-      this.renderDrawing(drawing);
-    });
-  };
-
-  renderDrawing = (drawing) => {
-    const { startX, startY, width, height, color, type, flipVertically, angle } = drawing;
-    const ctx = this.ctx;
-
-    ctx.save();
-
-    ctx.fillStyle = color;
-    ctx.strokeStyle = color;
-
-    // Rotate the canvas if needed
-    if (type === "Triangle" || type === "Rectangle" || type === "Square") {
-      ctx.translate(startX + width / 2, startY + height / 2);
-      ctx.rotate(angle);
-      ctx.translate(-(startX + width / 2), -(startY + height / 2));
-    }
-
-    switch (type) {
-      case "Circle":
-        const radius = Math.sqrt(width * width + height * height) / 2;
-        ctx.beginPath();
-        ctx.arc(startX + width / 2, startY + height / 2, radius, 0, 2 * Math.PI);
-        ctx.fill();
-        ctx.stroke();
-        break;
-
-      case "Rectangle":
-        ctx.beginPath();
-        ctx.rect(startX, startY, width, height);
-        ctx.fill();
-        ctx.stroke();
-        break;
-
-      case "Square":
-        ctx.beginPath();
-        const side = Math.min(Math.abs(width), Math.abs(height));
-        ctx.rect(startX, startY, width < 0 ? -side : side, height < 0 ? -side : side);
-        ctx.fill();
-        ctx.stroke();
-        break;
-
-      case "Triangle":
-        ctx.beginPath();
-        if (flipVertically) {
-          ctx.moveTo(startX + width / 2, startY);
-          ctx.lineTo(startX, startY + height);
-          ctx.lineTo(startX + width, startY + height);
-        } else {
-          ctx.moveTo(startX, startY + height);
-          ctx.lineTo(startX + width / 2, startY);
-          ctx.lineTo(startX + width, startY + height);
-        }
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-        break;
-
-      default:
-        break;
-    }
-
-    ctx.restore();
-  };
- startRecording = () => {
-    const canvas = this.canvasRef.current;
-    const stream = canvas.captureStream(); // Capture the canvas stream
-    this.mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
-    this.chunks = [];
-  
-    this.mediaRecorder.ondataavailable = (e) => {
-      if (e.data.size > 0) {
-        this.chunks.push(e.data);
-      }
-    };
-  
-    this.mediaRecorder.onstop = this.saveVideo;
-  
-    this.mediaRecorder.start();
-  };
-
-  handleButtonClick = async (inputID) => {
-    console.log(`Button with inputID ${inputID} clicked`);
-  
-    if (inputID === 9) {
-      const canvas = this.canvasRef.current;
-      if (this.state.isMotionApplied) {
-        // Save as video
-        this.saveAsVideo(canvas);
-      } else {
-        // Save as image
-        this.saveAsImage(canvas);
-      }
-  
-      this.ctx.clearRect(0, 0, canvas.width, canvas.height);
-      this.setState({ drawings: [], isMotionApplied: false });
+    if (selectedShape) {
+        this.ctx.putImageData(this.savedImageData, 0, 0);
+        this.drawShape(selectedShape, startX, startY, offsetX, offsetY);
     } else {
-      this.setState({ shouldUpload: false });
+        const midX = (startX + offsetX) / 2;
+        const midY = (startY + offsetY) / 2;
+
+        this.ctx.beginPath();
+        this.ctx.moveTo(startX, startY);
+        this.ctx.quadraticCurveTo(startX, startY, midX, midY); // Draw a smooth curve to the midpoint
+        this.ctx.lineTo(offsetX, offsetY);
+        this.ctx.stroke();
+        this.ctx.closePath();
+
+        // Update startX and startY for the next segment of the line
+        this.setState({
+            startX: offsetX,
+            startY: offsetY,
+        });
     }
-  };
-  
-  saveAsImage = (canvas) => {
-    canvas.toBlob(async (blob) => {
-      const file = new File([blob], `canvas-drawing.png`, { type: "image/png" });
-      console.log(file); // Check if the file is created correctly
-      this.setState({ fileToUpload: file, shouldUpload: true });
-  
-      const firebase = new FireBase();
-      const downloadURL = await firebase.uploadImage(file);
-      console.log("Download URL:", downloadURL);
-  
-      this.setState({ uploadedImageUrl: downloadURL });
-    });
-  };
-  
-  saveAsVideo = () => {
-    const canvasStream = this.canvasRef.current.captureStream();
-    this.mediaRecorder = new MediaRecorder(canvasStream, { mimeType: 'video/webm' });
-  
-    this.chunks = []; // Initialize chunks array to store video data
-  
-    this.mediaRecorder.ondataavailable = (event) => {
-      if (event.data.size > 0) {
-        this.chunks.push(event.data);
-      }
-    };
-  
-    this.mediaRecorder.onstop = async () => {
-      const videoBlob = new Blob(this.chunks, { type: 'video/webm' });
-      const videoFile = new File([videoBlob], 'canvas-animation.webm', { type: 'video/webm' });
-  
-      const thumbnailFile = await this.generateThumbnail(videoBlob);
-      this.uploadFiles(thumbnailFile, videoFile);
-    };
-  
-    this.mediaRecorder.start();
-  
-    // Stop recording after the animation duration
-    setTimeout(() => {
-      this.mediaRecorder.stop();
-    }, this.state.speed * 1000);
-  };
-  
-  
-  generateThumbnail = (videoBlob) => {
-    return new Promise((resolve) => {
-      const video = document.createElement('video');
-      video.src = URL.createObjectURL(videoBlob);
-  
-      video.addEventListener('loadeddata', () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-  
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-  
-        canvas.toBlob(blob => resolve(new File([blob], 'thumbnail.png', { type: 'image/png' })));
-      });
-    });
-  };
-  
-  uploadFiles = async (thumbnailFile, videoFile) => {
-    const firebase = new FireBase();
-  
-    const thumbnailURL = await firebase.uploadImage(thumbnailFile);
-    const videoURL = await firebase.uploadImage(videoFile);
-  
-    this.setState({ uploadedImageUrl: thumbnailURL, videoURL });
-  };
-  
-  
-  
+};
+
+
+  drawShape = (shape, startX, startY, offsetX, offsetY) => {
+    const width = offsetX - startX;
+    const height = offsetY - startY;
+
+    this.ctx.fillStyle = this.state.setBrushColor; // Set the fill style before filling the shape
+
+    switch (shape) {
+        case "Rectangle":
+            this.ctx.strokeRect(startX, startY, width, height);
+            this.ctx.fillRect(startX, startY, width, height); // Fill the rectangle
+            break;
+        case "Square":
+            const side = Math.min(Math.abs(width), Math.abs(height));
+            this.ctx.strokeRect(startX, startY, side * Math.sign(width), side * Math.sign(height));
+            this.ctx.fillRect(startX, startY, side * Math.sign(width), side * Math.sign(height)); // Fill the square
+            break;
+        case "Circle":
+            const radius = Math.sqrt(width * width + height * height) / 2;
+            this.ctx.beginPath();
+            this.ctx.arc(startX + width / 2, startY + height / 2, radius, 0, Math.PI * 2);
+            this.ctx.stroke();
+            this.ctx.fill(); // Fill the circle
+            break;
+        case "Triangle":
+            this.ctx.beginPath();
+            this.ctx.moveTo(startX, startY + height);
+            this.ctx.lineTo(startX + width / 2, startY);
+            this.ctx.lineTo(startX + width, startY + height);
+            this.ctx.closePath();
+            this.ctx.stroke();
+            this.ctx.fill(); // Fill the triangle
+            break;
+        default:
+            break;
+    }
+};
+
+
   handlePlayAnimation = () => {
-    const { motionType, rotate, x, y, speed, drawings,isVideoPlaying } = this.state;
-  
+    const { motionType, rotate, x, y, speed, drawings } = this.state;
+
     if (drawings.length > 0) {
       this.setState({ isMotionApplied: true });
-      this.startRecording(); // Start recording
-  
+
+      const canvasStream = this.canvasRef.current.captureStream();
+      this.mediaRecorder = new MediaRecorder(canvasStream, { mimeType: "video/webm" });
+      this.chunks = [];
+
+      this.mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          this.chunks.push(event.data);
+        }
+      };
+
+      this.mediaRecorder.onstop = async () => {
+        const videoBlob = new Blob(this.chunks, { type: "video/webm" });
+        const videoFile = new File([videoBlob], "canvas-animation.webm", { type: "video/webm" });
+
+        const thumbnailFile = await this.generateThumbnail(videoBlob);
+        const videoURL = await this.uploadFiles(thumbnailFile, videoFile);
+
+        this.setState((prevState) => ({
+          videoUrls: [...prevState.videoUrls, videoURL],
+        }));
+      };
+
+      this.mediaRecorder.start();
+      this.setState({ isRecording: true });
+
       anime({
         targets: drawings,
         duration: speed * 1000,
@@ -295,28 +187,55 @@ export default class Draw extends Component {
         update: (anim) => {
           const updatedDrawings = drawings.map((drawing) => {
             const newDrawing = { ...drawing };
-  
+
             if (motionType === "ROTATE") {
-              newDrawing.angle = (rotate * Math.PI / 180) * (anim.progress / 100);
+              newDrawing.angle = (rotate * Math.PI) / 180 * (anim.progress / 100);
             } else if (motionType === "LINEAR") {
               newDrawing.startX += (x * anim.progress) / 100;
               newDrawing.startY += (y * anim.progress) / 100;
             }
-  
+
             return newDrawing;
           });
-  
+
           this.setState({ drawings: updatedDrawings }, () => {
             this.renderAllDrawings(updatedDrawings);
           });
         },
         complete: () => {
-          this.mediaRecorder.stop(); // Stop recording when the animation is complete
+          console.log('Animation complete.');
+          // Don't stop recording here; let the user manually save it.
         },
       });
     }
   };
-  
+
+  generateThumbnail = (videoBlob) => {
+    return new Promise((resolve) => {
+      const video = document.createElement("video");
+      video.src = URL.createObjectURL(videoBlob);
+
+      video.addEventListener("loadeddata", () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        canvas.toBlob((blob) => resolve(new File([blob], "thumbnail.png", { type: "image/png" })));
+      });
+    });
+  };
+
+  uploadFiles = async (thumbnailFile, videoFile) => {
+    const firebase = new FireBase();
+
+    const thumbnailURL = await firebase.uploadImage(thumbnailFile);
+    const videoURL = await firebase.uploadImage(videoFile);
+
+    return videoURL;
+  };
 
   handleMotionTypeChange = (event) => {
     this.setState({ motionType: event.target.value });
@@ -342,9 +261,12 @@ export default class Draw extends Component {
     this.setState({ selectedShape: shape });
   };
 
+  handleBrushClick = () => {
+    this.setState({ selectedShape: null }); // Reset selectedShape to null for freehand drawing
+  };
 
   render() {
-    const { drawPage, isMotionApplied,motionType, rotate, x, y, speed, uploadedImageUrl ,isVideoPlaying,videoURL} = this.state;
+    const { drawPage, motionType, rotate, x, y, speed, imageUrls, videoUrls, setBrushColor, setBrushWidth, setEraserWidth } = this.state;
 
     return (
       <div style={{ backgroundColor: "rgba(238, 238, 238, 1)", minHeight: "100vh", width: "100vw", overflow: "hidden" }}>
@@ -416,44 +338,49 @@ export default class Draw extends Component {
           <button onClick={this.handlePlayAnimation}>Play Animation</button>
         </div>
 
-        <div>
-          {this.state.drawings.map((drawing, index) => (
-            <React.Fragment key={index}>{this.renderDrawing(drawing)}</React.Fragment>
-          ))}
-          {this.state.currentDrawing && this.renderDrawing(this.state.currentDrawing)}
-        </div>
-
         {drawPage.map((Dr) => (
-          <div key={Dr.inputID} className="btn3">
+          <div key={Dr.inputID} className="btn3" >
             <ul>
-              <li><button onClick={() => this.handleButtonClick(Dr.inputID)} className={Dr.inputCssClass}>{Dr.inputTitle}</button></li>
+              <li>
+                <button 
+                  onClick={() => this.handleButtonClick(Dr.inputID)} 
+                  className={Dr.inputCssClass}
+                >
+                  {Dr.inputTitle}
+                </button>
+              </li>
             </ul>
-
-               {/* Display the thumbnail or video */}
-               {Dr.inputID === 12 && (
-            <div className="uploaded-image-container">
-              {isVideoPlaying && videoURL ? (
-                <video controls style={{ border: "1px solid #000", width: "100%", height: "auto" }} onClick={() => this.setState({ isVideoPlaying: false })}>
-                  <source src={videoURL} type="video/webm" />
-                  Your browser does not support the video tag.
-                </video>
-              ) : (
-                <img 
-                  src={uploadedImageUrl || videoURL} 
-                  alt="Thumbnail" 
-                  style={{ border: "1px solid #000", width: "100%", height: "auto", cursor: "pointer" }}
-                  onClick={() => this.setState({ isVideoPlaying: !!videoURL })}
-                />
-              )}
-            </div>
-          )}
-        </div>
-      ))}
+            {Dr.inputID === 12 && (
+              <div className="bt3_save">
+                <div className="uploaded-files-container" style={{ display: 'flex', gap: '10px'}}>
+                  {imageUrls.map((url, index) => (
+                    <img 
+                      key={index}
+                      src={url} 
+                      alt={`Saved drawing ${index + 1}`} 
+                      style={{ width: "134px", height: "68px", cursor: "pointer", backgroundColor: "white"}}
+                    />
+                  ))}
+                  {videoUrls.map((url, index) => (
+                    <video 
+                      key={index} 
+                      alt={`Saved video ${index + 1}`}
+                      style={{ width: "134px", height: "68px", backgroundColor: "white" }} 
+                      controls muted
+                    >
+                      <source src={url} type="video/webm" />
+                    </video>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
 
         <div className="dropdown">
           <input type="checkbox" id="toggleBrush" />
           <label htmlFor="toggleBrush" onClick={this.handleBrushClick}>
-            <img id="brush" src="https://img.icons8.com/?size=100&id=13437&format=png&color=000000" alt="" />
+            <img id="brush" src="https://img.icons8.com/?size=100&id=13437&format=png&color=000000" alt="Brush Icon" />
           </label>
           <div className="content">
             <label htmlFor="brushColor">Brush Color:</label>
@@ -466,7 +393,7 @@ export default class Draw extends Component {
         <div className="eraser-dropdown">
           <input type="checkbox" id="toeraser" />
           <label htmlFor="toeraser" id="eraser" onClick={this.handleEraserClick}>
-            <img id="eraser" src="https://img.icons8.com/?size=100&id=46514&format=png&color=000000" alt="" />
+            <img id="eraser" src="https://img.icons8.com/?size=100&id=46514&format=png&color=000000" alt="Eraser Icon" />
           </label>
           <div className="dropdown-content">
             <label htmlFor="eraserWidth">Eraser Width:</label>
@@ -477,7 +404,7 @@ export default class Draw extends Component {
         <div className="dropdown-container">
           <input type="checkbox" id="toggleShapes" />
           <label htmlFor="toggleShapes">
-            <img id="shapes" src="https://img.icons8.com/?size=100&id=dN8m9joMwymk&format=png&color=000000" alt="Shapes" />
+            <img id="shapes" src="https://img.icons8.com/?size=100&id=dN8m9joMwymk&format=png&color=000000" alt="Shapes Icon" />
           </label>
           <ul className="theShapes">
             {["Circle", "Rectangle", "Triangle", "Square"].map((shape) => (
@@ -487,20 +414,14 @@ export default class Draw extends Component {
         </div>
 
         <div>
-          <img id="colors" src="https://img.icons8.com/?size=100&id=63814&format=png&color=000000" alt="" />
-          <img id="ai" src="https://img.icons8.com/?size=100&id=45060&format=png&color=000000" alt="" />
-          <img id="featture" src="https://img.icons8.com/?size=100&id=xsmDI5Qkj3wH&format=png&color=000000" alt="" />
+          <img id="colors" src="https://img.icons8.com/?size=100&id=63814&format=png&color=000000" alt="Colors Icon" />
+          <img id="ai" src="https://img.icons8.com/?size=100&id=45060&format=png&color=000000" alt="AI Icon" />
+          <img id="featture" src="https://img.icons8.com/?size=100&id=xsmDI5Qkj3wH&format=png&color=000000" alt="Feature Icon" />
         </div>
 
         <div>
-          <img id="next" src="https://img.icons8.com/?size=100&id=7404&format=png&color=FFFFFF" alt="" />
-          <img id="back" src="https://img.icons8.com/?size=100&id=7404&format=png&color=FFFFFF" alt="" />
-        </div>
-
-        <div id="folder">
-          <FontAwesomeIcon icon={faFolder} size="2xl" style={{ color: "#FFD43B" }} />
-          <br />
-          folder1
+          <img id="next" src="https://img.icons8.com/?size=100&id=7404&format=png&color=FFFFFF" alt="Next Icon" />
+          <img id="back" src="https://img.icons8.com/?size=100&id=7404&format=png&color=FFFFFF" alt="Back Icon" />
         </div>
       </div>
     );
