@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faKey, faEnvelope, faUser } from "@fortawesome/free-solid-svg-icons";
 import computersp from "../Img/computerremove.png";
-import Login from "./Login";
 import "../pagescss/Signup.css";
 import Header from "../Compheader/Header";
 import Footer from "../Compfooter/Footer";
@@ -16,52 +15,54 @@ export default class Signup extends Component {
       password: "",
       gmail: "",
       issignup: false,
+      error: "",
     };
   }
+
   componentDidMount() {
+    // Fetching signup page data
     fetch("http://localhost:3001/inputs/2")
       .then((response) => response.json())
       .then((data) => this.setState({ signupPage: data }))
-      .catch((error) =>
-        console.error("Error fetching header page data:", error)
-      );
+      .catch((error) => console.error("Error fetching signup page data:", error));
   }
+
   handleInputChange = (event) => {
-    const { name, value } = event.target; //refers to the input field that triggered the change event.
+    const { name, value } = event.target;
     this.setState({ [name]: value });
   };
 
   handleSubmit = (event) => {
-    event.preventDefault(); // prevent the default form submission behavior
-    const name = this.state.name;
-    const password = this.state.password;
-    const gmail = this.state.gmail;
-    const gmail_validation = new RegExp(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/);
-    const pass_vali = new RegExp(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$/);
+    event.preventDefault();
+
+    const { name, password, gmail } = this.state;
+    const gmailValidation = new RegExp(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/);
+    const passwordValidation = new RegExp(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$/);
+
     let errorMessage = "";
 
-    if (!gmail_validation.test(gmail)) {
-      errorMessage = "Please enter a valid email address";
+    // Validate email
+    if (!gmailValidation.test(gmail)) {
+      errorMessage = "Please enter a valid email address.";
     }
 
-    if (!pass_vali.test(password)) {
-      errorMessage = [
-        "Please enter a valid password address that includes: minimum 8 characters ",
-        "At least one uppercase English letter",
-        "At least one lowercase English letter.",
-        "At least one digit",
-      ];
-      return;
+    // Validate password
+    if (!passwordValidation.test(password)) {
+     errorMessage = "Password must be at least 8 characters long,\n" +
+      "contain one uppercase letter,\n" +
+      "one lowercase letter,\n" +
+      "and one digit.";
+    
     }
+  
 
-    if (gmail === null || gmail === undefined) {
-      console.log("the gmail is null");
-      return;
-    }
+    // If there's an error, display it and stop form submission
     if (errorMessage) {
       this.setState({ error: errorMessage });
+      return;
     }
 
+    // If validation passes, proceed with signup request
     fetch("http://localhost:3001/user/signup", {
       method: "POST",
       headers: {
@@ -77,6 +78,8 @@ export default class Signup extends Component {
       .then((data) => {
         console.log(data);
         this.setState({ issignup: true });
+        // Redirect to Draw page after successful signup
+        window.location.href = "/Draw";
       })
       .catch((error) => {
         console.error("Error signing up:", error);
@@ -85,15 +88,14 @@ export default class Signup extends Component {
   };
 
   render() {
-    const { signupPage } = this.state;
-    const errorMessage = this.state.error;
+    const { signupPage, error } = this.state;
 
     return (
       <div>
         <Header />
 
-        <h1>sign up </h1>
-        <p id="sentience">Create Story Sketch account </p>
+        <h1>Sign Up</h1>
+        <p id="sentience">Create a Story Sketch account</p>
         <div id="thebigwarp"></div>
 
         <div className="evet">
@@ -114,37 +116,37 @@ export default class Signup extends Component {
                   id="spinput"
                 ></input>
               </div>
-              {errorMessage && sp.inputType === "password" && (
-                <div style={{ color: "red" }}>{errorMessage}</div>
-              )}
-              {errorMessage && sp.inputType === "email" && (
-                <div style={{ color: "red" }}>{errorMessage}</div>
-              )}
             </div>
           ))}
+         {error && (
+  <div className="error-message">
+    {error}
+  </div>
+)}
+
         </div>
+
         <div id="iconUsp">
           <FontAwesomeIcon icon={faUser} />
         </div>
         <div id="iconKsp">
-          {" "}
           <FontAwesomeIcon icon={faKey} />
         </div>
         <div id="iconEsp">
           <FontAwesomeIcon icon={faEnvelope} />
         </div>
 
-        <a href="/Draw">
-          <button id="btn1" onClick={this.handleSubmit}>
-            sign up{" "}
-          </button>
-        </a>
+        {/* Signup button */}
+        <button id="btn1" onClick={this.handleSubmit}>
+          Sign Up
+        </button>
+
+        {/* Link to login page */}
         <a href="/Login" id="lnINsp">
-          {" "}
-          log in{" "}
+          Log In
         </a>
 
-        <Footer></Footer>
+        <Footer />
       </div>
     );
   }

@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import "../pagescss/Draw.css";
 import anime from "animejs";
 import FireBase from "./firebase";
-import Download from "./Download";
 
 export default class Draw extends Component {
   constructor(props) {
@@ -10,10 +9,11 @@ export default class Draw extends Component {
     this.state = {
       drawPage: [],
       setBrushColor: "black",
-      setBrushWidth: 5, // Brush width state
-      selectedShape: null, // Default to null for freehand drawing
+      selectedShape: "Rectangle",
+      setBrushWidth:"10",
       drawings: [],
       isDrawing: false,
+      isErase:false,
       motionType: "ROTATE",
       rotate: 0,
       x: 0,
@@ -21,11 +21,9 @@ export default class Draw extends Component {
       speed: 1,
       playAnimation: false,
       currentDrawing: null,
-      initialMousePosition: { x: 0, y: 0 },
       imageUrls: [],
       videoUrls: [],
       isMotionApplied: false,
-      isRecording: false,
       chunks: [],
     };
     this.canvasRef = React.createRef();
@@ -37,10 +35,9 @@ export default class Draw extends Component {
       .then((data) => {
         this.setState({ drawPage: data });
         this.ctx = this.canvasRef.current.getContext("2d");
-        this.ctx.fillStyle = "#fff";
         this.ctx.lineCap = "round";
-        this.ctx.strokeStyle = this.state.setBrushColor;
-        this.ctx.lineWidth = this.state.setBrushWidth;
+        this.ctx.strokeStyle = this.state.setBrushColor ? this.setBrushColor :this.setEraserColor ;
+        this.ctx.lineWidth = this.state.setBrushWidth ? this.setBrushColor : this.setEraserWidth;
 
       })
       .catch((error) => console.error("Error fetching header page data:", error));
@@ -48,110 +45,174 @@ export default class Draw extends Component {
 
   handleMouseDown = (e) => {
     const { clientX, clientY } = e;
+    this.startX = clientX;
+    this.startY = clientY;
+    this.ctx.beginPath();
+    this.ctx.moveTo(clientX, clientY);
+    this.setState({ isDrawing: true });
     const rect = e.target.getBoundingClientRect();
-    const initialPosition = { x: clientX - rect.left, y: clientY - rect.top };
-
+    const Position = { x: clientX - rect.left, y: clientY - rect.top };
+  
     this.setState({
       isDrawing: true,
-      initialMousePosition: initialPosition,
-      startX: initialPosition.x,
-      startY: initialPosition.y,
+      initialMousePosition: Position,
     });
-
-    // Save current canvas state for shape drawing
-    this.savedImageData = this.ctx.getImageData(0, 0, this.canvasRef.current.width, this.canvasRef.current.height);
   };
-
+  
   handleMouseUp = () => {
-    if (this.state.isDrawing) {
-      this.setState((prevState) => ({
-        isDrawing: false,
-        drawings: [...prevState.drawings, prevState.currentDrawing],
-        currentDrawing: null,
-      }));
-      this.ctx.beginPath(); // Resets the path for freehand drawing
+    if(this.state.isDrawing) {
+      this.ctx.closePath();
+      if (this.state.selectedShape) {
+        this.setState((prevState) => ({
+          isDrawing: false,
+          isDraw: false,
+          drawings: [...prevState.drawings, {
+            type: this.state.selectedShape,
+            startX: this.startX,
+            startY: this.startY,
+            width: this.endX - this.startX,
+            height: this.endY - this.startY,
+          }],
+          currentDrawing: null,
+        }));
+      } else {
+        this.setState((prevState) => ({
+          isDrawing: false,
+          isDraw: false,
+          drawings: [...prevState.drawings, prevState.currentDrawing],
+          currentDrawing: null,
+        }));
+      }
     }
+    this.setState({ isErase: false, selectedShape: null });
   };
 
   handleMouseMove = (e) => {
     if (!this.state.isDrawing) return;
-
-    const { clientX, clientY } = e;
-    const rect = this.canvasRef.current.getBoundingClientRect();
-    const offsetX = clientX - rect.left;
-    const offsetY = clientY - rect.top;
-
-    const { setBrushColor, setBrushWidth, selectedShape, startX, startY } = this.state;
-
-    this.ctx.strokeStyle = setBrushColor;
-    this.ctx.lineWidth = setBrushWidth;
-    this.ctx.lineJoin = "round"; // Join lines with rounded edges
-    this.ctx.lineCap = "round"; // End lines with rounded edges
-
-    if (selectedShape) {
-        this.ctx.putImageData(this.savedImageData, 0, 0);
-        this.drawShape(selectedShape, startX, startY, offsetX, offsetY);
+    const { offsetX, offsetY } = e.nativeEvent;
+  
+    this.ctx.globalCompositeOperation = this.state.isErase
+     ? "destination-out"
+      : "source-over";
+    this.ctx.lineWidth = this.state.isErase
+     ? this.state.setEraserWidth
+      : this.state.setBrushWidth;
+    this.ctx.strokeStyle = this.state.setBrushColor;
+  
+    if (this.state.selectedShape) {
+      this.ctx.clearRect(0, 0, this.canvasRef.current.width, this.canvasRef.current.height);
+      this.renderAllDrawings(this.state.drawings);
+      const updatedDrawing = {
+        type: this.state.selectedShape,
+        startX: this.state.initialMousePosition.x,
+        startY: this.state.initialMousePosition.y,
+        width: offsetX - this.state.initialMousePosition.x,
+        height: offsetY - this.state.initialMousePosition.y,
+        color: this.state.setBrushColor,
+      };
+      this.renderDrawing(updatedDrawing);
     } else {
-        const midX = (startX + offsetX) / 2;
-        const midY = (startY + offsetY) / 2;
-
-        this.ctx.beginPath();
-        this.ctx.moveTo(startX, startY);
-        this.ctx.quadraticCurveTo(startX, startY, midX, midY); // Draw a smooth curve to the midpoint
+      if (this.startX && this.startY) {
         this.ctx.lineTo(offsetX, offsetY);
         this.ctx.stroke();
-        this.ctx.closePath();
-
-        // Update startX and startY for the next segment of the line
-        this.setState({
-            startX: offsetX,
-            startY: offsetY,
-        });
+      }
+      this.startX = offsetX;
+      this.startY = offsetY;
     }
-};
+  };
 
+  renderAllDrawings = (drawings) => {
+    
+    drawings.forEach((drawing) => {
+      // Check if drawing is not null or undefined
+      if (drawing) {
+        this.renderDrawing(...drawing);
+      }
+    });
+  };
 
-  drawShape = (shape, startX, startY, offsetX, offsetY) => {
-    const width = offsetX - startX;
-    const height = offsetY - startY;
+  renderDrawing = (drawing) => {
+    // Safely destructure properties, making sure drawing is valid
+    if (!drawing) return;
 
-    this.ctx.fillStyle = this.state.setBrushColor; // Set the fill style before filling the shape
+  const { startX, startY, width, height, color, type, flipVertically, angle } = drawing;
+  const ctx = this.ctx;
 
-    switch (shape) {
-        case "Rectangle":
-            this.ctx.strokeRect(startX, startY, width, height);
-            this.ctx.fillRect(startX, startY, width, height); // Fill the rectangle
-            break;
-        case "Square":
-            const side = Math.min(Math.abs(width), Math.abs(height));
-            this.ctx.strokeRect(startX, startY, side * Math.sign(width), side * Math.sign(height));
-            this.ctx.fillRect(startX, startY, side * Math.sign(width), side * Math.sign(height)); // Fill the square
-            break;
-        case "Circle":
-            const radius = Math.sqrt(width * width + height * height) / 2;
-            this.ctx.beginPath();
-            this.ctx.arc(startX + width / 2, startY + height / 2, radius, 0, Math.PI * 2);
-            this.ctx.stroke();
-            this.ctx.fill(); // Fill the circle
-            break;
-        case "Triangle":
-            this.ctx.beginPath();
-            this.ctx.moveTo(startX, startY + height);
-            this.ctx.lineTo(startX + width / 2, startY);
-            this.ctx.lineTo(startX + width, startY + height);
-            this.ctx.closePath();
-            this.ctx.stroke();
-            this.ctx.fill(); // Fill the triangle
-            break;
-        default:
-            break;
+  ctx.save();
+  ctx.fillStyle = color;
+  ctx.strokeStyle = color;
+  
+    // Drawing logic for different shapes
+    switch (type) {
+      case "Circle":
+        const radius = Math.sqrt(width * width + height * height) / 2;
+        ctx.beginPath();
+        ctx.arc(startX + width / 2, startY + height / 2, radius, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.stroke();
+        break;
+  
+      case "Rectangle":
+      case "Square":
+        ctx.beginPath();
+        const side = type === "Square" ? Math.min(Math.abs(width), Math.abs(height)) : null;
+        ctx.rect(startX, startY, type === "Square" ? (width < 0 ? -side : side) : width, type === "Square" ? (height < 0 ? -side : side) : height);
+        ctx.fill();
+        ctx.stroke();
+        break;
+  
+      case "Triangle":
+        ctx.beginPath();
+        if (flipVertically) {
+          ctx.moveTo(startX + width / 2, startY);
+          ctx.lineTo(startX, startY + height);
+          ctx.lineTo(startX + width, startY + height);
+        } else {
+          ctx.moveTo(startX, startY + height);
+          ctx.lineTo(startX + width / 2, startY);
+          ctx.lineTo(startX + width, startY + height);
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        break;
+  
+      default:
+        break;
     }
-};
+  
+    ctx.restore();
+  };
 
+  handleButtonClick = async (inputID) => {
+    console.log(`Button with inputID ${inputID} clicked`);
+    const canvas = this.canvasRef.current;
+    if (inputID === 9) {
+      if (this.state.isMotionApplied ) {
+        this.mediaRecorder.stop();
+      } else {
+        this.saveAsImage(canvas);
+      }
+
+      this.ctx.clearRect(0, 0, canvas.width, canvas.height);
+      this.setState({ drawings: [], isMotionApplied: false });
+    }
+  };
+
+  saveAsImage = (canvas) => {
+    canvas.toBlob(async (blob) => {
+      const file = new File([blob], "canvas-drawing.png", { type: "image/png" });
+      const firebase = new FireBase();
+      const downloadURL = await firebase.uploadImage(file);
+
+      this.setState((prevState) => ({
+        imageUrls: [...prevState.imageUrls, downloadURL],
+      }));
+    });
+  };
 
   handlePlayAnimation = () => {
-    const { motionType, rotate, x, y, speed, drawings } = this.state;
-
+    const {drawings}=this.state;
     if (drawings.length > 0) {
       this.setState({ isMotionApplied: true });
 
@@ -169,8 +230,8 @@ export default class Draw extends Component {
         const videoBlob = new Blob(this.chunks, { type: "video/webm" });
         const videoFile = new File([videoBlob], "canvas-animation.webm", { type: "video/webm" });
 
-        const thumbnailFile = await this.generateThumbnail(videoBlob);
-        const videoURL = await this.uploadFiles(thumbnailFile, videoFile);
+        
+        const videoURL = await this.uploadFiles( videoFile);
 
         this.setState((prevState) => ({
           videoUrls: [...prevState.videoUrls, videoURL],
@@ -178,64 +239,45 @@ export default class Draw extends Component {
       };
 
       this.mediaRecorder.start();
-      this.setState({ isRecording: true });
+      this.animation();
 
-      anime({
-        targets: drawings,
-        duration: speed * 1000,
-        easing: "linear",
-        update: (anim) => {
-          const updatedDrawings = drawings.map((drawing) => {
-            const newDrawing = { ...drawing };
-
-            if (motionType === "ROTATE") {
-              newDrawing.angle = (rotate * Math.PI) / 180 * (anim.progress / 100);
-            } else if (motionType === "LINEAR") {
-              newDrawing.startX += (x * anim.progress) / 100;
-              newDrawing.startY += (y * anim.progress) / 100;
-            }
-
-            return newDrawing;
-          });
-
-          this.setState({ drawings: updatedDrawings }, () => {
-            this.renderAllDrawings(updatedDrawings);
-          });
-        },
-        complete: () => {
-          console.log('Animation complete.');
-          // Don't stop recording here; let the user manually save it.
-        },
-      });
     }
-  };
+ }
 
-  generateThumbnail = (videoBlob) => {
-    return new Promise((resolve) => {
-      const video = document.createElement("video");
-      video.src = URL.createObjectURL(videoBlob);
+ animation =()=>{
+  const { motionType, rotate, x, y, speed, drawings } = this.state;
+ anime({ 
+  targets: drawings,
+  duration: speed * 1000,
+  easing: "Rotate",
+  update: (anim) => {
+    const updatedDrawings = drawings.map((drawing) => {
+      const newDrawing = { ...drawing };
 
-      video.addEventListener("loadeddata", () => {
-        const canvas = document.createElement("canvas");
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
+      if (motionType === "ROTATE") {
+        newDrawing.angle = (rotate * Math.PI) / 180 * (anim.progress / 100);
+      } else if (motionType === "LINEAR") {
+        newDrawing.startX += (x * anim.progress) / 100;
+        newDrawing.startY += (y * anim.progress) / 100;
+      }
 
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-        canvas.toBlob((blob) => resolve(new File([blob], "thumbnail.png", { type: "image/png" })));
-      });
+      return newDrawing;
     });
-  };
+  
+    this.setState({ drawings: updatedDrawings }, () => {
+      this.renderAllDrawings(updatedDrawings);
+    });
+  },
+  
+})
+}
 
-  uploadFiles = async (thumbnailFile, videoFile) => {
+  uploadFiles = async ( videoFile) => {
     const firebase = new FireBase();
-
-    const thumbnailURL = await firebase.uploadImage(thumbnailFile);
     const videoURL = await firebase.uploadImage(videoFile);
-
     return videoURL;
   };
+
 
   handleMotionTypeChange = (event) => {
     this.setState({ motionType: event.target.value });
@@ -258,15 +300,60 @@ export default class Draw extends Component {
   };
 
   handleShapeChange = (shape) => {
-    this.setState({ selectedShape: shape });
+    this.setState({ selectedShape: shape, isDrawing: false });
+  };
+  setBrushColor = (color) => {
+    this.setState({ setBrushColor: color }, () => {
+      console.log('Brush color changed to:', this.state.setBrushColor);
+    });
+  }
+
+  setBrushWidth = (width) => {
+    this.setState({ setBrushWidth: width }, () => {
+      console.log('Brush width changed to:', this.state.setBrushWidth);
+    });
+  }
+  setEraserWidth=(width)=>{
+    this.setState({setEraserWidth:width},()=>
+    console.log("erase :",this.state.setEraserWidth))
+   
+  }
+  setEraserColor = (color) => {
+    this.setState({ eraserColor: color }, () => {
+      console.log('Eraser color changed to:', this.state.setEraserColor);
+    });
+  }
+  startDrawing = () => {
+    this.setState({ isErase: false, isDrawing: true });
   };
 
-  handleBrushClick = () => {
-    this.setState({ selectedShape: null }); // Reset selectedShape to null for freehand drawing
+  startErasing = (er) => {
+    const { offsetX, offsetY } = er.nativeEvent;
+    this.ctx.beginPath();
+    this.ctx.moveTo(offsetX, offsetY);
+    this.setState({ isErase: true, isDrawing: false });
   };
+
+  Erasing = (er) => {
+    if (!this.state.isErase && !this.state.isDrawing) return;
+    const { offsetX, offsetY } = er.nativeEvent;
+   this.ctx.strokeStyle = this.state.isErase ? this.state.setEraserColor: this.state.setBrushColor;
+    this.ctx.globalCompositeOperation = 'destination-out';
+    this.ctx.fillStyle = 'white';
+    this.ctx.lineWidth = this.state.setEraserWidth;
+    this.ctx.lineTo(offsetX, offsetY);
+    this.ctx.stroke();
+  }
+  
+  
+  endErasing = () => {
+    this.setState({ isErase: false });
+    this.ctx.closePath();
+  }
+
 
   render() {
-    const { drawPage, motionType, rotate, x, y, speed, imageUrls, videoUrls, setBrushColor, setBrushWidth, setEraserWidth } = this.state;
+    const { drawPage, motionType, rotate, x, y, speed, imageUrls, videoUrls ,drawings} = this.state;
 
     return (
       <div style={{ backgroundColor: "rgba(238, 238, 238, 1)", minHeight: "100vh", width: "100vw", overflow: "hidden" }}>
@@ -292,24 +379,11 @@ export default class Draw extends Component {
           {motionType === "ROTATE" && (
             <div>
               <label htmlFor="input_rotate">Rotate:
-                <input
-                  type="number"
-                  value={rotate}
-                  onChange={this.handleRotateChange}
-                  min={-360}
-                  max={360}
-                  id="input_rotate"
-                />
+                <input type="number" value={rotate} onChange={this.handleRotateChange} min={-360} max={360} id="input_rotate"/>
               </label>
               <label>
                 Speed (seconds):
-                <input
-                  type="number"
-                  value={speed}
-                  onChange={this.handleSpeedChange}
-                  step="0.1"
-                  min="0.1"
-                />
+                <input type="number" value={speed} onChange={this.handleSpeedChange} step="0.1" min="0.1" />
               </label>
             </div>
           )}
@@ -324,13 +398,7 @@ export default class Draw extends Component {
               </label>
               <label>
                 Speed (seconds):
-                <input
-                  type="number"
-                  value={speed}
-                  onChange={this.handleSpeedChange}
-                  step="0.1"
-                  min="0.1"
-                />
+                <input  type="number"  value={speed} onChange={this.handleSpeedChange} step="0.1"  min="0.1"/>
               </label>
             </div>
           )}
@@ -338,8 +406,15 @@ export default class Draw extends Component {
           <button onClick={this.handlePlayAnimation}>Play Animation</button>
         </div>
 
+        <div>
+          {this.state.drawings.map((drawing, index) => (
+            <div key={index}>{this.renderDrawing(drawing)}</div>
+          ))}
+          {this.state.currentDrawing && this.renderDrawing(this.state.currentDrawing)}
+        </div>
+        
         {drawPage.map((Dr) => (
-          <div key={Dr.inputID} className="btn3" >
+          <div key={Dr.inputID} className="btn3">
             <ul>
               <li>
                 <button 
@@ -350,21 +425,20 @@ export default class Draw extends Component {
                 </button>
               </li>
             </ul>
+
             {Dr.inputID === 12 && (
               <div className="bt3_save">
-                <div className="uploaded-files-container" style={{ display: 'flex', gap: '10px'}}>
+                <div className="uploaded-files-container" style={{ display: 'flex', gap: '5px' }}>
                   {imageUrls.map((url, index) => (
                     <img 
                       key={index}
                       src={url} 
-                      alt={`Saved drawing ${index + 1}`} 
-                      style={{ width: "134px", height: "68px", cursor: "pointer", backgroundColor: "white"}}
+                      style={{ width: "134px", height: "68px", cursor: "pointer", backgroundColor: "white" }}
                     />
                   ))}
                   {videoUrls.map((url, index) => (
                     <video 
                       key={index} 
-                      alt={`Saved video ${index + 1}`}
                       style={{ width: "134px", height: "68px", backgroundColor: "white" }} 
                       controls muted
                     >
@@ -376,11 +450,12 @@ export default class Draw extends Component {
             )}
           </div>
         ))}
+        
 
         <div className="dropdown">
           <input type="checkbox" id="toggleBrush" />
           <label htmlFor="toggleBrush" onClick={this.handleBrushClick}>
-            <img id="brush" src="https://img.icons8.com/?size=100&id=13437&format=png&color=000000" alt="Brush Icon" />
+            <img id="brush" src="https://img.icons8.com/?size=100&id=13437&format=png&color=000000" alt="" />
           </label>
           <div className="content">
             <label htmlFor="brushColor">Brush Color:</label>
@@ -392,8 +467,8 @@ export default class Draw extends Component {
 
         <div className="eraser-dropdown">
           <input type="checkbox" id="toeraser" />
-          <label htmlFor="toeraser" id="eraser" onClick={this.handleEraserClick}>
-            <img id="eraser" src="https://img.icons8.com/?size=100&id=46514&format=png&color=000000" alt="Eraser Icon" />
+          <label htmlFor="toeraser" id="eraser"  onClick={(e) => this.startErasing(e)}>
+            <img id="eraser" src="https://img.icons8.com/?size=100&id=46514&format=png&color=000000" alt="" />
           </label>
           <div className="dropdown-content">
             <label htmlFor="eraserWidth">Eraser Width:</label>
@@ -404,24 +479,19 @@ export default class Draw extends Component {
         <div className="dropdown-container">
           <input type="checkbox" id="toggleShapes" />
           <label htmlFor="toggleShapes">
-            <img id="shapes" src="https://img.icons8.com/?size=100&id=dN8m9joMwymk&format=png&color=000000" alt="Shapes Icon" />
+            <img id="shapes" src="https://img.icons8.com/?size=100&id=dN8m9joMwymk&format=png&color=000000" alt="Shapes" />
           </label>
           <ul className="theShapes">
-            {["Circle", "Rectangle", "Triangle", "Square"].map((shape) => (
-              <li key={shape} onClick={() => this.handleShapeChange(shape)}>{shape}</li>
-            ))}
-          </ul>
+          {["Circle", "Rectangle", "Triangle", "Square"].map((shape) => (
+            <li key={shape} onClick={(e) => this.handleShapeChange(shape)}>{shape}</li>
+          ))}
+        </ul>
         </div>
 
         <div>
-          <img id="colors" src="https://img.icons8.com/?size=100&id=63814&format=png&color=000000" alt="Colors Icon" />
-          <img id="ai" src="https://img.icons8.com/?size=100&id=45060&format=png&color=000000" alt="AI Icon" />
-          <img id="featture" src="https://img.icons8.com/?size=100&id=xsmDI5Qkj3wH&format=png&color=000000" alt="Feature Icon" />
-        </div>
-
-        <div>
-          <img id="next" src="https://img.icons8.com/?size=100&id=7404&format=png&color=FFFFFF" alt="Next Icon" />
-          <img id="back" src="https://img.icons8.com/?size=100&id=7404&format=png&color=FFFFFF" alt="Back Icon" />
+          <img id="colors" src="https://img.icons8.com/?size=100&id=63814&format=png&color=000000" alt="Colors" />
+          <img id="ai" src="https://img.icons8.com/?size=100&id=45060&format=png&color=000000" alt="AI" />
+          <img id="featture" src="https://img.icons8.com/?size=100&id=xsmDI5Qkj3wH&format=png&color=000000" alt="Feature" />
         </div>
       </div>
     );

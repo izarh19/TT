@@ -117,36 +117,47 @@ background-color: black;
 font-family: "Times New Roman", Times, serif;
 font-size: medium;
 z-index: 1;
+cursor: pointer;
 }
 
 #lnINsp {/* the log in button */
 position: absolute;
 bottom: 130px;
-right: 300px;
+right: 310px;
 color: black;
 font-family: "Times New Roman", Times, serif;
 font-size: large;
+cursor: pointer;
 }
 
 
 #iconUsp  {
-top: 238px;
+top:  290px;
 left: 328px;
 position:absolute;
 z-index: 1;
 }
 
 #iconKsp {
-top: 290px;
+top:342px;
 left: 328px;
 position:absolute;
 z-index: 1;
 
 }
 #iconEsp{
-top: 342px;
-left:328px;
+top: 238px;
+left: 328px;
 position:absolute;
 z-index: 1;
 
+}
+.error-message {
+position: absolute;
+left: 373px;
+  white-space: pre-line; /* This preserves the newlines (\n) */
+  color: rgb(0, 0, 0);
+  margin-top: 20px;
+  background-color: transparent;
+  border-color :#fff8e7;
 }

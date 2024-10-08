@@ -56,7 +56,18 @@ app.use('/hf/:id', async (req, res) => {/** DONE MENUES  */
   try {
     const MID = req.params.id;
     const men = await menuid(MID);  // Ensure this function returns a promise
-    const hfpath = men.filter(obj => obj.MID == MID);  // Use obj.MID instead of obj.id
+    const hfpath = men
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    .filter(obj => obj.MID == MID);  // Use obj.MID instead of obj.id
     if (hfpath) {
       res.json(hfpath);
     } else {
@@ -102,6 +113,43 @@ app.use('/user/login', async (req, res) => {
     res.status(500).json({ error: 'An error occurred while fetching menus' });
   }
 })
+ 
+app.use('/user/login', async (req, res) => {
+  const { userName, userPassword } = req.body;
+  try {
+    const userData = await users.login(userName, userPassword);
+    if (userData.length > 0) {
+      res.json({ success: true, user: userData });
+    } else {
+      res.status(404).json({ success: false, message: 'Invalid username or password' });
+    }
+  } catch (error) {
+    console.error('Error during traditional login:', error);
+    res.status(500).json({ success: false, message: 'Server error during login' });
+  }
+});
+
+// Route for Google login (Google email)
+app.use('/user/login-with-google', async (req, res) => {
+  const { googleEmail } = req.body;
+  try {
+    const userData = await users.findByEmail(googleEmail);
+    if (userData) {
+      res.json({ success: true, user: userData });
+    } else {
+      // Create a new user if not found
+      const newUser = await users.create({
+        userName: googleEmail.split('@')[0],  // Create a default username
+        userEmail: googleEmail,
+        userPassword: null,  // No password for Google users
+      });
+      res.json({ success: true, user: newUser });
+    }
+  } catch (error) {
+    console.error('Error during Google login:', error);
+    res.status(500).json({ success: false, message: 'Server error during Google login' });
+  }
+});
 
 app.use('/user/signup', async (req, res) => {
   try {

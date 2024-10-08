@@ -102,12 +102,14 @@ color: #fefefe;
 font-family:"Times New Roman", Times, serif;
 font-size: medium;
 z-index: 1;
+cursor: pointer;
 }
 
 
 #sp{
 color:black;
 z-index: 1;
+cursor: pointer;
 
 }
 
@@ -145,19 +147,19 @@ z-index: 1;
 
 #iconK{/* icon key*/
 position: absolute;
-top:322px;
+top:365px;
 left:502px;
 z-index: 1;
 }
 #iconU{/* icon user*/
 position: absolute;
-top:281px;
+top:325px;
 left:502px;
 z-index: 1;
 }
 #iconG{
 position: absolute;
-top:170px;
+top:210px;
 right:700px;
 z-index: 1;
 }
@@ -193,3 +195,38 @@ left:40px;
 font-family:"Times New Roman", Times, serif;
 font-size: medium;
 }
+
+/* In Login.css */
+.error-message {
+  position: absolute;
+  top: 9%; /* Adjust this to position the error at the top */
+  left: 44%;
+  z-index: 999; 
+  color: red;
+  font-weight: bold;
+  background-color: white; /* Optional: To make it stand out */
+  padding: 10px;
+  border: 2px solid black ;
+  border-radius: 5px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Add some shadow to make it pop */
+  font-family:"Times New Roman", Times, serif;
+}
+
+.fade-out {
+  animation: fadeOut 5s forwards; /* Apply animation */
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 0.1;
+  }
+  100% {
+    opacity: 0;
+    display: none; /* Hide after fading out */
+  }
+}
+
+

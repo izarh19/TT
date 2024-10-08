@@ -31,7 +31,7 @@ export default class Header extends Component {
         <div className="header">
           <a href="./Home">
             <div id="logoimg">
-      n       <img src={logoimg} alt="logo" />
+           <img src={logoimg} alt="logo" />
             </div>
           </a>
 

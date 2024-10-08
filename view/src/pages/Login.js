@@ -30,124 +30,132 @@ export default class Login extends Component {
     this.client_id =
       "879215836200-aq3vqd98ocq3ea7emuousrd3an18e9go.apps.googleusercontent.com";
   }
-
+  
   componentDidMount() {
-    /*When a web page is loaded in a browser, the browser parses the HTml code and creates a tree-like structure where each HTml element becomes a node in the tree. */
+    // Fetch the login page data from your backend
     fetch("http://localhost:3001/inputs/1")
-      .then((response) =>
-        response.json()
-      ) /*after you cheak if the id is there , return the response from type json */
+      .then((response) => response.json())
       .then((data) => {
-        this.setState({ loginPage: data, loading: false });
-      }) /* return for me the data i want to get from the json in the empty array that i defined, update it by using setstate */
-      .catch((error) =>
-        console.error("Error fetching header page data:", error)
-      ); /* if there is error with the fetch like network or sentax in the fetch return error */
+        this.setState({
+          loginPage: data,
+          loading: false,  // Turn off loading after data is loaded
+        });
+      })
+      .catch((error) => {
+        console.error("Error fetching login page data:", error);
+        this.setState({ error: "Failed to load login page data", loading: false });
+      });
 
+    // Google Auth setup
     gapi.load("client:auth2", () => {
-      gapi.client
-        .init({
+      if (!gapi.auth2.getAuthInstance()) {
+        gapi.auth2.init({
           clientId: this.client_id,
-          scope: "userGmail",
-        })
-        .then(() => {
+          scope: "profile email",
+        }).then(() => {
           console.log("Google client initialized");
-        })
-        .catch((error) => {
+        }).catch((error) => {
           console.error("Error initializing Google client:", error);
         });
+      }
     });
   }
 
+  // Handle input change for traditional login
   handleInputChange = (event) => {
-    const { name, password, value } = event.target;
-    this.setState({ [name]: value, [password]: value });
+    const { name, value } = event.target;
+    this.setState({ [name]: value });
   };
 
+  // Handle traditional login (username and password)
   handleSubmit = (event) => {
-    event.preventDefault(); // prevent the default form submission behavior
-    const name = this.state.name;
-    const password = this.state.password;
-    fetch("http://localhost:3001/user/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+    event.preventDefault();  // Prevent form submission
+    const { name, password } = this.state;
 
-      body: JSON.stringify({ userName: name, userPassword: password }),
-    })
-      .then((response) => response.json())
+    // Fetch API call to traditional login route
+    fetch("http://localhost:3001/user/login")
+      .then((response) => {
+        if (!response.ok) {
+          return response.json().then((data) => {
+            throw new Error(data.message || "Login failed");
+          });
+        }
+        return response.json();
+      })
       .then((data) => {
-        console.log(data);
-        this.setState({ isLogin: true });
+        if (data.success) {
+          this.setState({ isLogin: true, error: "" });
+          window.location.href = "/Draw";  // Redirect on successful login
+        }
       })
       .catch((error) => {
-        console.error("Error logging in:", error);
-        this.setState({ error: "An error occurred while login" });
+        this.setState({ error: error.message });
       });
   };
 
+  // Handle Google login success
   onSuccess = (response) => {
-    this.loggoogle(response);
-    console.log("Successful :) You are in", response);
-  };
+    const profile = response.profileObj;
+    const googleEmail = profile.email;
 
-  loggoogle = (response) => {
-    console.log("this is res:", response);
-    const idToken = response.getAuthResponse().id_token;
-    fetch("http://localhost:3001/user/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ idToken: idToken }),
-    })
+    // Fetch API call to Google login route
+    fetch("http://localhost:3001/user/login-with-google")
       .then((response) => response.json())
       .then((data) => {
-        console.log(data);
-        this.setState({ isLogin: true });
+        if (data.success) {
+          this.setState({ isLogin: true, error: "" });
+          window.location.href = "/Draw";  // Redirect to the "Draw" page on successful login
+        } else {
+          this.setState({ error: data.message || "Login failed" });
+        }
       })
       .catch((error) => {
-        console.error("Error logging in:", error);
-        this.setState({ error: "An error occurred while logging in" });
+        console.error("Error during Google login:", error);
+        this.setState({ error: "An error occurred during Google login." });
       });
   };
 
+  // Handle Google login failure
   onFailure = (response) => {
-    console.log("Unsuccessful :( You are not in", response);
+    console.log("Google login failed:", response);
+    this.setState({ error: "Google login failed. Please try again." });
   };
-
+  onLogoutSuccess = () => {
+    console.log("Logout successful");
+    this.setState({ isLogin: false });
+    // Optionally, redirect to the login page or perform other actions
+  };
+  
   render() {
-    const { loginPage, error, loading } = this.state;
-
+    const { loginPage, error, loading ,isLogin,GoogleLogout } = this.state;
+  
     if (loading) {
-      /*indicates whether some data is being fetched or processed. If loading is true, it means data is being loaded, so you display a loading message.*/
       return <div>Loading...</div>;
     }
-
-    if (error) {
-      return (
-        <div>Error {error.message}</div>
-      ); /*This indicates if an error occurred during data fetching or processing. If error is present, you display an error message. */
-    }
-
-    if (!loginPage) {
-      /* if log in page is not found in the node or im returning in  the fetch somthing else */
-      return <div>Page not found</div>;
-    }
+  
     return (
       <div>
         <Header />
         <div id="login-buttons">
+        
+        {!isLogin ? (
+          // Show Google Login button if not logged in
           <GoogleLogin
             clientId={this.client_id}
             buttonText="Log in with Google"
             onSuccess={this.onSuccess}
             onFailure={this.onFailure}
-            isSignedIn={true}
             cookiePolicy={"single_host_origin"}
           />
-          
+        ) : (
+          // Show Google Logout button if logged in
+          <GoogleLogout
+            clientId={this.client_id}
+            buttonText="Log out"
+            onLogoutSuccess={this.onLogoutSuccess}
+          />
+        )}
+
         </div>
         <h1 id="login">Log in</h1>
         <img src={tool} alt="" id="tool" />
@@ -175,11 +183,18 @@ export default class Login extends Component {
             )
           )}
         </div>
-        <a href="/Draw">
-          <button className="btn2" type="submit" onClick={this.handleSubmit}>
-            Log in
-          </button>
-        </a>
+  
+       
+        {error && (
+  <div className="error-message fade-out">
+    {error}
+  </div>
+)}
+  
+        <button className="btn2" type="submit" onClick={this.handleSubmit}>
+          Log in
+        </button>
+  
         <div id="iconK">
           <FontAwesomeIcon icon={faKey} />
         </div>
@@ -201,4 +216,4 @@ export default class Login extends Component {
       </div>
     );
   }
-}
+}  
